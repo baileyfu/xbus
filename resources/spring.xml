@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<bean id="xbusProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+		<property name="resources" value="classpath*:xbus.yml"/>
+	</bean>
+	<context:property-placeholder properties-ref="xbusProperties"/>
+
+	<context:component-scan base-package="xbus" />		
+	<context:annotation-config />
+	<aop:aspectj-autoproxy />
+	
+	<bean id="streamBroker" class="xbus.stream.broker.rabbit.RabbitMQBroker">
+		<constructor-arg ref="rabbitTemplate"/>
+	</bean>
+	<bean id="terminalConfigurator" class="xbus.stream.terminal.zk.WebConfigurator" init-method="init" destroy-method="destory">
+		<property name="terminalInitializingMonitor" ref="streamBroker"/>
+		<property name="appName " ref="${xbus.appName}"/>
+		<property name="errorExit " ref="${xbus.stream.errorExit}"/>
+		<property name="rootPath " ref="${xbus.stream.zk.rootPath}"/>
+		<property name="servers " ref="${xbus.stream.zk.servers}"/>
+	</bean>
+</beans>

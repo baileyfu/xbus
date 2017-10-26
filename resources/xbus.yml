@@ -1,0 +1,13 @@
+xbus: 
+  appName: appName
+  stream: 
+    broker: 
+        prop: 
+          consumer: 
+            timeoutMillis: -1
+          producer: 
+            timeoutMillis: -1
+    errorExit: true
+    zk: 
+      rootPath: /xbus
+      servers: 10.16.3.103:2181,10.16.3.104:2181,10.16.3.105:2181

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean id="xbusRabbitProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+		<property name="resources" value="classpath:xbus-rabbit.yml"/>
+	</bean>
+	<context:property-placeholder properties-ref="xbusRabbitProperties"/>
+	
+	<bean id="rabbitConnectionFactory" class="org.springframework.amqp.rabbit.connection.CachingConnectionFactory">
+		<constructor-arg index="0" value="${xbus.stream.rabbit.host}"/>
+		<constructor-arg index="1" value="${xbus.stream.rabbit.port}"/>
+		<!-- <property name="addresses" value="${xbus.stream.rabbit.addresses}"/> -->
+		<property name="username" value="${xbus.stream.rabbit.username}"/>
+		<property name="password" value="${xbus.stream.rabbit.password}"/>
+		<property name="cacheMode" value="${xbus.stream.rabbit.cacheMode}"/>
+		<property name="channelCacheSize" value="${xbus.stream.rabbit.channelCacheSize}"/>
+	</bean>
+	
+	<bean id="rabbitTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate">
+		<property name="connectionFactory" ref="rabbitConnectionFactory" />
+	</bean>
+	
+</beans>
