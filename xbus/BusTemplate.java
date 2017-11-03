@@ -9,7 +9,7 @@ import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 总线模板<br/>
- * 用于向总线发送消息
+ * 唯一对外提供服务的接口
  * 
  * @author bailey
  * @version 1.0

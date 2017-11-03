@@ -19,7 +19,7 @@ import xbus.stream.terminal.Terminal;
 import xbus.stream.terminal.TerminalNode;
 
 /**
- * 监听ZooKeeper变动
+ * 监听ZooKeeper变动;单例实现;系统关闭时需调用stop释放资源
  * 
  * @author bailey
  * @version 1.0

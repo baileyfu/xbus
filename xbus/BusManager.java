@@ -27,7 +27,7 @@ import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 总线管理器<br/>
- * 对外提供服务的唯一接口
+ * 单例实现;系统关闭时会释放资源
  * 
  * @author bailey
  * @version 1.0

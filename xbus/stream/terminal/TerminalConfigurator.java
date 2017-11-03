@@ -16,7 +16,7 @@ import xbus.stream.StreamLoggerHolder;
 
 /**
  * 终端配置器; <br/>
- * 实时维护终端及其节点信息
+ * 实时维护终端及其节点信息;系统关闭时会释放资源
  * 
  * @author bailey
  * @version 1.0
