@@ -23,12 +23,20 @@ public class Terminal {
 	public TerminalNode[] getNodes() {
 		return nodes;
 	}
-
 	public void setNodes(Set<TerminalNode> nodes) {
 		if (nodes == null || nodes.size() == 1)
 			this.nodes = null;
 		this.nodes = new TerminalNode[nodes.size()];
 		nodes.toArray(this.nodes);
+	}
+
+	/**
+	 * 直接将当前Terminal的nodes指向source的nodes,以减少创建对象的开销
+	 * 
+	 * @param source
+	 */
+	public void referNodes(Terminal source) {
+		this.nodes = source.nodes;
 	}
 	public void distribute(Consumer<TerminalNode> transmitter) {
 		if (nodes != null && nodes.length > 0) {

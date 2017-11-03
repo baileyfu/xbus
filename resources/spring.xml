@@ -19,11 +19,12 @@
 	<bean id="streamBroker" class="xbus.stream.broker.rabbit.RabbitMQBroker">
 		<constructor-arg ref="rabbitTemplate"/>
 	</bean>
-	<bean id="terminalConfigurator" class="xbus.stream.terminal.zk.WebConfigurator" init-method="init" destroy-method="destory">
+	<bean id="terminalConfigurator" class="xbus.stream.terminal.zk.WebConfigurator" init-method="init">
 		<property name="terminalInitializingMonitor" ref="streamBroker"/>
-		<property name="appName " ref="${xbus.appName}"/>
-		<property name="errorExit " ref="${xbus.stream.errorExit}"/>
-		<property name="rootPath " ref="${xbus.stream.zk.rootPath}"/>
-		<property name="servers " ref="${xbus.stream.zk.servers}"/>
 	</bean>
+	<bean id="busTemplate" class="xbus.BusTemplate" init-method="init">
+		<constructor-arg index="0" ref="streamBroker"/>
+		<constructor-arg index="1" ref="terminalConfigurator"/>
+	</bean>
+	<bean class="xbus.spring.BusBeanPostProcessor"/>
 </beans>

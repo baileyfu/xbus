@@ -3,6 +3,8 @@ package xbus.stream.terminal.zk;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -12,83 +14,71 @@ import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 
-import xbus.stream.terminal.TerminalConfigurator;
+import xbus.stream.StreamLoggerHolder;
 import xbus.stream.terminal.Terminal;
 import xbus.stream.terminal.TerminalNode;
 
 /**
- * 仅维护在线节点
+ * 监听ZooKeeper变动
  * 
  * @author bailey
  * @version 1.0
- * @date 2017-10-26 16:59
+ * @date 2017-11-03 10:45
  */
-@Deprecated
-public class OnlineConfigurator extends TerminalConfigurator{
-	private String currentNodeName;
-	private String currentNodeFullPath;
-	private ZkClient zkClient;
-	private String rootPath;
-	private String servers;
+public final class ZookeeperListener implements StreamLoggerHolder{
+	private static ZookeeperListener instance;
 
-	public void setRootPath(String rootPath) {
+	private String rootPath;
+	private String currentTerminalPath;
+	private String currentTerminalNodePath;
+	private ZkClient zkClient;
+	private boolean running;
+	private Consumer<Set<Terminal>> terminalUpdater;
+	private BiConsumer<String,Set<TerminalNode>> terminalNodeUpdater;
+
+	private ZookeeperListener(String servers,String rootPath,String currentTerminalPath,String currentTerminalNodePath) {
 		this.rootPath = rootPath;
-	}
-	public void setServers(String servers) {
-		this.servers = servers;
-	}
-	@Override
-	public void listen() {
+		this.currentTerminalPath = currentTerminalPath;
+		this.currentTerminalNodePath = currentTerminalNodePath;
+		this.running = false;
 		zkClient = new ZkClient(servers, 10000, 10000, new SerializableSerializer());
-		//注册当前terminal和node
-		String currentTerminalFullPath = new StringBuilder(rootPath).append("/").append(appName).toString();
-		currentNodeName = new StringBuilder(ip).append(":").append(port).toString();
-		currentNodeFullPath = new StringBuilder(currentTerminalFullPath).append("/").append(currentNodeName).toString();
-		if(!zkClient.exists(currentTerminalFullPath)){
-			try{
-				//终端有多个节点时可能会抛出异常
-				zkClient.createPersistent(currentTerminalFullPath,appName);
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-		}
-		if (!zkClient.exists(currentNodeFullPath)) {
-			/**
-			 * 永久性节点问题在于当某服务宕机时无法调用release方法以删除该节点；优点是当回话状态变动时不会导致节点变更
-			 */
-			//zkClient.createPersistent(currentNodeFullPath, nodeName);
-			/**
-			 * Node作为临时节点以使某节点宕机时能自动从注册中心注销从而通知到其他所有Terminal<br/>
-			 * 缺点是当回话状态变动时临时节点会删除，需要再次注册，还会引起其他所有节点监听此节点的删除、新建从而引发各节点的updateTerminalNode动作
-			 */
-			zkClient.createEphemeral(currentNodeFullPath, currentNodeName);
-		}
-		//监听root的子节点(Terminal)变动
-		zkClient.subscribeChildChanges(rootPath, terminalListener);
-		zkClient.subscribeStateChanges(stateListener);
-		flush(zkClient.getChildren(rootPath));
 	}
-	@Override
-	public void release() {
-		if (zkClient != null) {
+	public void setTerminalUpdater(Consumer<Set<Terminal>> terminalUpdater) {
+		this.terminalUpdater = terminalUpdater;
+	}
+	public void setTerminalNodeUpdater(BiConsumer<String, Set<TerminalNode>> terminalNodeUpdater) {
+		this.terminalNodeUpdater = terminalNodeUpdater;
+	}
+	synchronized void start() {
+		if (!running) {
+			if(!zkClient.exists(currentTerminalPath)){
+				try{
+					//终端有多个节点时可能会抛出异常
+					zkClient.createPersistent(currentTerminalPath,currentTerminalPath);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+			if (!zkClient.exists(currentTerminalNodePath)) {
+				zkClient.createPersistent(currentTerminalNodePath, currentTerminalNodePath);
+			}
+			//监听root的子节点(Terminal)变动
+			zkClient.subscribeChildChanges(rootPath, terminalListener);
+			zkClient.subscribeStateChanges(stateListener);
+			flush(zkClient.getChildren(rootPath));
+			running=true;
+		}
+	}
+	synchronized void stop() {
+		if (running) {
 			//取消所有监听订阅
 			zkClient.unsubscribeAll();
-			try {
-				//将自己删除
-				zkClient.delete(currentNodeFullPath);
-			} catch (Exception e) {
-				LOGGER.error("zk.DefaultConfigurator.zkClient delete current node error!", e);
-			}
-			try{
-				zkClient.close();
-			}catch(Exception e){
-				LOGGER.error("zk.DefaultConfigurator.zkClient close error!", e);
-			}
+			zkClient.close();
 		}
 	}
 	private void flush(List<String> terminals){
 		//读取已注册的节点
-		updateTerminal(terminals != null && terminals.size() > 0?terminals.stream().map(nodeValue2Terminal).collect(Collectors.toSet()):null);
+		terminalUpdater.accept(terminals != null && terminals.size() > 0?terminals.stream().map(nodeValue2Terminal).collect(Collectors.toSet()):null);
 	}
 	private IZkChildListener terminalListener=new IZkChildListener(){
 		@Override
@@ -103,10 +93,6 @@ public class OnlineConfigurator extends TerminalConfigurator{
 		}
 		@Override
 		public void handleNewSession() throws Exception {
-			/**
-			 * 恢复连接时需再此创建临时节点
-			 */
-			zkClient.createEphemeral(currentNodeFullPath, currentNodeName);
 			/**
 			 * session重置后重新读取最新节点已防止session失效期间节点发生变动
 			 */
@@ -133,7 +119,7 @@ public class OnlineConfigurator extends TerminalConfigurator{
 					}
 				}
 			}
-			updateTerminalNode(terminalName, nodes);
+			terminalNodeUpdater.accept(terminalName, nodes);
 		}
 	};
 	private Function<String,Terminal> nodeValue2Terminal=(terminalName)->{
@@ -158,4 +144,9 @@ public class OnlineConfigurator extends TerminalConfigurator{
 		terminal.setNodes(nodes);
 		return terminal;
 	};
+	public static synchronized ZookeeperListener getInstance(String servers,String rootPath,String currentTerminalPath,String currentTerminalNodePath) {
+		if (instance == null)
+			instance = new ZookeeperListener(servers, rootPath, currentTerminalPath,currentTerminalNodePath);
+		return instance;
+	}
 }

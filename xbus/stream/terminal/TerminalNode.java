@@ -6,11 +6,10 @@ package xbus.stream.terminal;
  * @version 1.0
  * @date 2017-10-20 17:26
  */
-public class TerminalNode {
+public class TerminalNode{
 	private String terminalName;
 	private String ip;
 	private String port;
-	private boolean durable;
 
 	public TerminalNode(String terminalName) {
 		this.terminalName = terminalName;
@@ -34,14 +33,6 @@ public class TerminalNode {
 
 	public void setPort(String port) {
 		this.port = port;
-	}
-
-	public boolean isDurable() {
-		return durable;
-	}
-
-	public void setDurable(boolean durable) {
-		this.durable = durable;
 	}
 
 	public String getName(){
