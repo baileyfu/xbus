@@ -1,14 +1,17 @@
-package xbus;
+package com.xbus.test;
 
 import java.lang.reflect.Method;
 
 import org.springframework.stereotype.Component;
+
+import com.alibaba.fastjson.JSONObject;
 
 import xbus.annotation.BusEndpoint;
 import xbus.annotation.BusRoot;
 import xbus.em.MessageContentType;
 import xbus.stream.message.OriginalBusMessage;
 import xbus.stream.message.payload.BusPayload;
+import xbus.stream.message.payload.JSONBusPayload;
 
 /**
  * 
@@ -18,14 +21,17 @@ import xbus.stream.message.payload.BusPayload;
  */
 @Component
 @BusRoot("/notice")
-public class BusProperties{
+public class BusTester{
 	
 	@BusEndpoint(value = "pay", contentType = MessageContentType.JSON)
-	public void payNotice(OriginalBusMessage message){
+	public void payNotice(String sourceTerminal,JSONBusPayload busPayload){
+		JSONObject json = busPayload.getValue();
+		String value = json.getString("key");
+		System.out.println("key : " + value);
 	}
 	
 	public static void main(String[] args) throws Exception{
-		BusProperties b=new BusProperties();
+		BusTester b=new BusTester();
 		Method m = b.getClass().getMethod("payNotice", OriginalBusMessage.class);
 		Object o=m.invoke(b,new OriginalBusMessage());
 		System.out.println((BusPayload)o);

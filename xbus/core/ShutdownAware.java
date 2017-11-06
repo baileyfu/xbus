@@ -1,4 +1,4 @@
-package xbus;
+package xbus.core;
 
 /**
  * 系统关闭时需关闭某些资源

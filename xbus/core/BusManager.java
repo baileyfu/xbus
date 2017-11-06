@@ -1,11 +1,11 @@
-package xbus;
+package xbus.core;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.apache.http.util.Asserts;
 
@@ -15,6 +15,7 @@ import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import xbus.BusLoggerHolder;
 import xbus.em.MessageType;
 import xbus.em.PostMode;
 import xbus.stream.broker.StreamBroker;
@@ -38,7 +39,7 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 	
 	private StreamBroker streamBroker;
 	private TerminalConfigurator terminalConfigurator;
-	private Map<String, Function<OriginalBusMessage, BusPayload>> endpointHandlers;
+	private Map<String, BiFunction<String,BusPayload, BusPayload>> endpointHandlers;
 	private Map<String, Consumer<BusPayload>> endpointReplyHandlers;
 	private Disposable disposable;
 
@@ -56,7 +57,7 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 	 * @param path
 	 * @param handler
 	 */
-	void addEndpointHandler(String path, Function<OriginalBusMessage, BusPayload> handler) {
+	void addEndpointHandler(String path, BiFunction<String,BusPayload, BusPayload> handler) {
 		endpointHandlers.put(path, handler);
 	}
 	/**
@@ -120,7 +121,7 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 	public void post(String terminalName, BusMessage message, PostMode postMode) {
 		Asserts.notEmpty(terminalName, "terminalName");
 		Terminal target = terminalConfigurator.getTerminal(terminalName);
-		Asserts.notNull(target, "terminal(" + terminalName + ")对象");
+		Asserts.notNull(target, "terminal(" + terminalName + ")");
 		Terminal terminal=postMode.buildTerminal();
 		terminal.setName(target.getName());
 		terminal.referNodes(target);
@@ -142,7 +143,7 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 		int i=0;
 		for (String terminalName:terminalNames) {
 			Terminal target = terminalConfigurator.getTerminal(terminalName);
-			Asserts.notNull(target, "terminal(" + terminalName + ")对象");
+			Asserts.notNull(target, "terminal(" + terminalName + ")");
 			terminals[i]=postMode.buildTerminal();
 			terminals[i].setName(target.getName());
 			terminals[i++].referNodes(target);
@@ -161,9 +162,9 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 		String path = message.getPath();
 		if(message.getMessageType()==MessageType.ORIGINAL){
 			OriginalBusMessage originalMessage = (OriginalBusMessage) message;
-			Function<OriginalBusMessage, BusPayload> handler = endpointHandlers.get(path);
+			BiFunction<String,BusPayload, BusPayload> handler = endpointHandlers.get(path);
 			Asserts.check(handler != null, "the originalBusMessageHandler of path '" + path + "' of " + sourceTerminalName + " does not exist!");
-			BusPayload receipt = handler.apply(originalMessage);
+			BusPayload receipt = handler.apply(originalMessage.getSourceTerminal(), originalMessage.getPayLoad());
 			if (originalMessage.isRequireReceipt()) {
 				Asserts.check(receipt != null, "the path '" + path + "' of " + sourceTerminalName + "' require receipt , but the receipt is null!");
 				Terminal sourceTerminal = terminalConfigurator.getTerminal(sourceTerminalName);
@@ -180,7 +181,7 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 	public synchronized void start() {
 		if (disposable == null) {
 			disposable = Flowable.create((FlowableOnSubscribe<Long>) e -> {
-							Observable.interval(10, TimeUnit.MILLISECONDS).take(Integer.MAX_VALUE).subscribe(e::onNext);
+							Observable.interval(50, TimeUnit.MILLISECONDS).take(Integer.MAX_VALUE).subscribe(e::onNext);
 						}, BackpressureStrategy.DROP)
 						.subscribeOn(Schedulers.newThread())
 						.observeOn(Schedulers.io())
@@ -190,11 +191,11 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 								try {
 									receive(message);
 								} catch (Exception e) {
-									LOGGER.error("xbus.BusManager consume error !", t);
+									LOGGER.error("BusManager consume error ! there is a advise that you had better catch the Exception in yourown endpoint method .", t);
 								}
 							}
 						}, (t)->{
-							LOGGER.error("xbus.BusManager pull message error !", t);
+							LOGGER.error("BusManager pull message error !", t);
 						});
 		}
 	}

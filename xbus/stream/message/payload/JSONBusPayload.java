@@ -35,7 +35,7 @@ public class JSONBusPayload extends BusPayload {
 		this.value = (JSONObject) value;
 	}
 	@Override
-	public Object getValue() {
+	public JSONObject getValue() {
 		return value;
 	}
 	@Override

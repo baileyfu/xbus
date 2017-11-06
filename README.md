@@ -1,4 +1,4 @@
-# 消息总线
+# 消息总线 V1.0.0
 基于Spring对异步消息进行抽象，将对生产者/消费者的操作抽象为对终端的操作；相关概念如下：<br/>
 Terminal：某个服务或应用<br/>
 TerminalNode：服务或应用的某个具体节点；一般指当前节点<br/>
@@ -8,8 +8,37 @@ Endpoint：某服务或应用中的一个服务端点；类似SpringMVC的Contro
 
 默认Terminal的注册管理是ZooKeeper，MQ是RabbitMQ<br/>
 ##### Notice：若消息需要回执而消费端处理消息后未返回回执或返回Null，则消费端会抛出异常；但并不影响系统运行
+
+###版本变更记录
+<table>
+	<tr align='center'>
+		<th>版本</th>
+		<th>日期</th>
+		<th>描述</th>
+	</tr>
+	<tr align='center'>
+		<td>V1.0.0</td>
+		<td>2017-11-03</td>
+		<td align="left">完成预期功能,可投入使用</td>
+	</tr>
+	<tr align='center'>
+		<td>V1.0.1</td>
+		<td>2017-11-05</td>
+		<td align="left">新增异步消息模板AsyncBusTemplate</td>
+	</tr>
+	<tr align='center'>
+		<td>V1.0.2</td>
+		<td>2017-11-06</td>
+		<td align="left">1.endpoint的处理方法参数由OriginalBusMessage修改为sourceTerminal和具体的BusPayload<br/>
+			2.各BusPayload的getValue返回不再是Object而是对应的数据类型
+		</td>
+	</tr>
+</table>
+
+---
+
 ### e.g
-Spring配置增加：
+Spring配置：
 
 	<bean id="xbusProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
 		<!-- 定义当前服务名(全局唯一)和zk地址等 -->
@@ -24,11 +53,11 @@ Spring配置增加：
 	<bean id="terminalConfigurator" class="xbus.stream.terminal.zk.WebConfigurator" init-method="init">
 		<property name="terminalInitializingMonitor" ref="streamBroker"/>
 	</bean>
-	<bean id="busTemplate" class="xbus.BusTemplate" init-method="init">
+	<bean id="busTemplate" class="xbus.core.BusTemplate" init-method="init">
 		<constructor-arg index="0" ref="streamBroker"/>
 		<constructor-arg index="1" ref="terminalConfigurator"/>
 	</bean>
-	<bean class="xbus.spring.BusBeanPostProcessor"/>
+	<bean class="xbus.core.BusBeanPostProcessor"/>
 	
 使用：
 	
@@ -64,6 +93,8 @@ Spring配置增加：
 			...
 		}
 	}
+
+---
 
 ### 配置详解
 @BusRoot:配置端点的根路径<br/>

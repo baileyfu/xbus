@@ -11,7 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import xbus.ShutdownAware;
+import xbus.core.ShutdownAware;
 import xbus.stream.StreamLoggerHolder;
 
 /**

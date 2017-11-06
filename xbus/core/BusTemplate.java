@@ -1,4 +1,4 @@
-package xbus;
+package xbus.core;
 
 import java.util.Set;
 
@@ -8,23 +8,15 @@ import xbus.stream.message.BusMessage;
 import xbus.stream.terminal.TerminalConfigurator;
 
 /**
- * 总线模板<br/>
- * 唯一对外提供服务的接口
+ * 默认同步方式发送消息
  * 
  * @author bailey
  * @version 1.0
  * @date 2017-11-03 09:53
  */
-public class BusTemplate {
-	private BusManager busManager;
-
+public class BusTemplate extends AbstractBusAccessor {
 	public BusTemplate(StreamBroker streamBroker, TerminalConfigurator terminalConfigurator) {
-		BusManager.create(streamBroker, terminalConfigurator);
-	}
-
-	public void init() {
-		busManager = BusManager.getInstance();
-		busManager.start();
+		super(streamBroker, terminalConfigurator);
 	}
 
 	/**

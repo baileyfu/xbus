@@ -27,7 +27,7 @@ public class BytesBusPayload extends BusPayload {
 		this.value=(byte[])value;
 	}
 	@Override
-	public Object getValue() {
+	public byte[] getValue() {
 		return value;
 	}
 	@Override

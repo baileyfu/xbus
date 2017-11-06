@@ -1,4 +1,4 @@
-package xbus;
+package xbus.core;
 
 import java.lang.reflect.Method;
 
@@ -6,10 +6,8 @@ import org.apache.http.util.Asserts;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
-import xbus.BusManager;
 import xbus.annotation.BusEndpoint;
 import xbus.annotation.BusRoot;
-import xbus.stream.message.OriginalBusMessage;
 import xbus.stream.message.payload.BusPayload;
 
 /**
@@ -48,16 +46,17 @@ public class BusBeanPostProcessor implements BeanPostProcessor {
 					path.append("/").append(endpoint);
 					// 检查方法参数及返回类型
 					Class<?>[] paramType = method.getParameterTypes();
-					Asserts.check(paramType != null && paramType.length == 1, "the method of endpoint only permit one parameter");
-					Asserts.check(paramType[0].isAssignableFrom(OriginalBusMessage.class), "the parameter of method of endpoint only could be "+OriginalBusMessage.class);
+					Asserts.check(paramType != null && paramType.length == 2, "the method of endpoint only permit two parameters , the first is sourceTerminal which is String and the second is a BusPayload .");
+					Asserts.check(paramType[0].isAssignableFrom(String.class), "the first parameter of method of endpoint only could be "+String.class);
+					Asserts.check(paramType[1].isAssignableFrom(BusPayload.class), "the second parameter of method of endpoint only could be "+BusPayload.class);
 					Class<?> returnType = method.getReturnType();
 					Asserts.check(returnType == Void.class, "the returnType of endpoint only could be either void or " + BusPayload.class);
 					
-					busManager.addEndpointHandler(path.toString(), (originalBusMessage)->{
+					busManager.addEndpointHandler(path.toString(), (sourceTerminal,busPayload)->{
 						try {
-							if (originalBusMessage.getContentType() != busEndpoint.contentType())
-								throw new IllegalArgumentException("bus endpointHandler of path " + path.toString() + " needs "+busEndpoint.contentType()+",but received "+originalBusMessage.getContentType());
-							return (BusPayload)method.invoke(bean, originalBusMessage);
+							if (busPayload.getContentType() != busEndpoint.contentType())
+								throw new IllegalArgumentException("bus endpointHandler of path " + path.toString() + " needs "+busEndpoint.contentType()+",but received "+busPayload.getContentType());
+							return (BusPayload) method.invoke(bean, sourceTerminal, busPayload);
 						} catch (Exception e) {
 							throw new RuntimeException("bus endpointHandler of path " + path.toString() + " handle message error!", e);
 						}
