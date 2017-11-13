@@ -5,8 +5,12 @@ xbus:
     broker: 
         durable: true
         consumer: 
+            retryAble: true
+            retryCount: 3
             timeoutMillis: -1
         producer: 
+            retryAble: true
+            retryCount: 3
             timeoutMillis: -1
     zk: 
       rootPath: /xbus

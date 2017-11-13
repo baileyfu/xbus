@@ -2,29 +2,23 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<bean id="xbusProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
 		<property name="resources" value="classpath*:xbus.yml"/>
 	</bean>
 	<context:property-placeholder properties-ref="xbusProperties"/>
-
-	<context:component-scan base-package="xbus" />		
-	<context:annotation-config />
-	<aop:aspectj-autoproxy />
 	
-	<bean id="streamBroker" class="xbus.stream.broker.rabbit.RabbitMQBroker">
+	<bean id="streamBroker" class="xbus.stream.broker.rabbit.RabbitMQStreamBroker">
 		<constructor-arg ref="rabbitTemplate"/>
 	</bean>
 	<bean id="terminalConfigurator" class="xbus.stream.terminal.zk.WebConfigurator" init-method="init">
 		<property name="terminalInitializingMonitor" ref="streamBroker"/>
 	</bean>
-	<bean id="busTemplate" class="xbus.BusTemplate" init-method="init">
+	<bean id="busTemplate" class="xbus.core.BusTemplate" init-method="init">
 		<constructor-arg index="0" ref="streamBroker"/>
 		<constructor-arg index="1" ref="terminalConfigurator"/>
 	</bean>
-	<bean class="xbus.spring.BusBeanPostProcessor"/>
+	<bean class="xbus.core.BusBeanPostProcessor"/>
 </beans>

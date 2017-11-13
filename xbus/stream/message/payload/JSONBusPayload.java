@@ -1,5 +1,7 @@
 package xbus.stream.message.payload;
 
+import org.apache.http.util.Asserts;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
@@ -22,7 +24,10 @@ public class JSONBusPayload extends BusPayload {
 		contentType = MessageContentType.JSON;
 		value = bytes == null ? null : JSON.parseObject(new String(bytes));
 	}
-
+	public JSONBusPayload(String value) {
+		contentType = MessageContentType.JSON;
+		this.value = JSONObject.parseObject(value);
+	}
 	public JSONBusPayload(JSONObject value) {
 		contentType = MessageContentType.JSON;
 		this.value = value;
@@ -30,9 +35,14 @@ public class JSONBusPayload extends BusPayload {
 
 	@Override
 	public void setValue(Object value) {
-		if (!(value instanceof JSONObject))
-			throw new IllegalArgumentException("JSONBusPayload's value only the accept com.alibaba.fastjson.JSONObject");
-		this.value = (JSONObject) value;
+		Asserts.notNull(value, "value");
+		if (value instanceof String) {
+			this.value = JSONObject.parseObject(value.toString());
+		} else if (value instanceof JSONObject) {
+			this.value = (JSONObject) value;
+		} else {
+			throw new IllegalArgumentException("JSONBusPayload's value only accept com.alibaba.fastjson.JSONObject");
+		}
 	}
 	@Override
 	public JSONObject getValue() {

@@ -18,10 +18,17 @@
 		<property name="password" value="${xbus.stream.rabbit.password}"/>
 		<property name="cacheMode" value="${xbus.stream.rabbit.cacheMode}"/>
 		<property name="channelCacheSize" value="${xbus.stream.rabbit.channelCacheSize}"/>
+		<!-- 默认启用发布确认模式 -->
+		<property name="publisherConfirms" value="true"/>
+     	<property name="publisherReturns" value="true"/>
 	</bean>
 	
 	<bean id="rabbitTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate">
 		<property name="connectionFactory" ref="rabbitConnectionFactory" />
+		<!-- 不启用事务 -->
+		<property name="transactional" value="false" />
+		<!-- 使用确认机制则强制性为true -->
+		<property name="mandatory" value="true" />
 	</bean>
 	
 </beans>

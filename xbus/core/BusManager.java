@@ -3,21 +3,22 @@ package xbus.core;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import org.apache.http.util.Asserts;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
+import commons.fun.NAFunction;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
-import io.reactivex.FlowableOnSubscribe;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.FlowableEmitter;
 import io.reactivex.schedulers.Schedulers;
 import xbus.BusLoggerHolder;
 import xbus.em.MessageType;
 import xbus.em.PostMode;
+import xbus.stream.broker.AbstractStreamBroker;
 import xbus.stream.broker.StreamBroker;
 import xbus.stream.message.BusMessage;
 import xbus.stream.message.OriginalBusMessage;
@@ -34,21 +35,25 @@ import xbus.stream.terminal.TerminalConfigurator;
  * @version 1.0
  * @date 2017-10-30 09:28
  */
-public final class BusManager extends ShutdownAware implements BusLoggerHolder {
+public final class BusManager implements BusLoggerHolder {
 	private static BusManager instance;
 	
 	private StreamBroker streamBroker;
 	private TerminalConfigurator terminalConfigurator;
 	private Map<String, BiFunction<String,BusPayload, BusPayload>> endpointHandlers;
 	private Map<String, Consumer<BusPayload>> endpointReplyHandlers;
-	private Disposable disposable;
+	private boolean running;
+	private FlowableEmitter<BusMessage> emitter;
+	private Subscription subscription;
 
-	private BusManager(StreamBroker streamBroker, TerminalConfigurator terminalConfigurator) {
+	protected BusManager(StreamBroker streamBroker, TerminalConfigurator terminalConfigurator) {
 		this.streamBroker = streamBroker;
 		this.terminalConfigurator = terminalConfigurator;
 		endpointHandlers = new HashMap<>();
 		endpointReplyHandlers = new HashMap<>();
-		disposable = null;
+		running = false;
+		emitter = null;
+		subscription = null;
 	}
 
 	/**
@@ -58,6 +63,8 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 	 * @param handler
 	 */
 	void addEndpointHandler(String path, BiFunction<String,BusPayload, BusPayload> handler) {
+		if (endpointHandlers.containsKey(path))
+			throw new UnsupportedOperationException("duplicate endpointHandler of path '" + path + "'");
 		endpointHandlers.put(path, handler);
 	}
 	/**
@@ -76,6 +83,7 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 		if (message.getMessageType() == MessageType.ORIGINAL) {
 			OriginalBusMessage originalBusMessage = (OriginalBusMessage) message;
 			Asserts.check(originalBusMessage.getReceiptConsumer() != null, "the receiptHandler of path '" + message.getPath() + "' can not be null!");
+			// 回执处理器以第一次操作时加入的为准
 			if (!endpointReplyHandlers.containsKey(message.getPath())) {
 				endpointReplyHandlers.put(message.getPath(), originalBusMessage.getReceiptConsumer());
 			}
@@ -177,33 +185,85 @@ public final class BusManager extends ShutdownAware implements BusLoggerHolder {
 			handler.accept(message.getPayLoad());
 		}
 	}
-	
-	public synchronized void start() {
-		if (disposable == null) {
-			disposable = Flowable.create((FlowableOnSubscribe<Long>) e -> {
-							Observable.interval(50, TimeUnit.MILLISECONDS).take(Integer.MAX_VALUE).subscribe(e::onNext);
-						}, BackpressureStrategy.DROP)
-						.subscribeOn(Schedulers.newThread())
-						.observeOn(Schedulers.io())
-						.subscribe((t)->{
-							BusMessage message=streamBroker.consume();
-							if (message != null) {
+	/**
+	 * 生产/消费失败不可回滚/重试
+	 */
+	synchronized void start() {
+		doStartWithRx(((AbstractStreamBroker) streamBroker).isConsumeRetryAble() ? 
+				() -> {
+					streamBroker.consume((busMessage) -> {
+						try {
+							receive(busMessage);
+							return true;
+						} catch (Exception e) {
+							LOGGER.error(BusManager.class + " receive error ! xbus will rollback this consumption and try consume again .", e);
+						}
+						return false;
+					});
+				} : () -> {
+					BusMessage message = streamBroker.consume();
+					if (message != null) {
+						emitter.onNext(message);
+						subscription.request(Long.MAX_VALUE);
+					}
+				});
+	}
+	private void doStartWithRx(NAFunction doEmit) {
+		if (!running) {
+			stop();
+			running = true;
+			Flowable.<BusMessage>create((emt) -> {
+						this.emitter = emt;
+						while (running) {
+							try {
+								doEmit.apply();
+							} catch (Exception e) {
+								LOGGER.error(BusManager.class + " consume error !", e);
+								// 出错后暂停100ms
 								try {
-									receive(message);
-								} catch (Exception e) {
-									LOGGER.error("BusManager consume error ! there is a advise that you had better catch the Exception in yourown endpoint method .", t);
+									Thread.sleep(100l);
+								} catch (InterruptedException ie) {
+									LOGGER.error(BusManager.class + " Thread.sleep() error", ie);
 								}
 							}
-						}, (t)->{
-							LOGGER.error("BusManager pull message error !", t);
-						});
+						}
+					}, BackpressureStrategy.BUFFER)
+					.observeOn(Schedulers.newThread())
+					.subscribeOn(Schedulers.io())
+					.subscribe(new Subscriber<BusMessage>(){
+						@Override
+						public void onSubscribe(Subscription s) {
+							subscription = s;
+						}
+						@Override
+						public void onNext(BusMessage message) {
+							try {
+								receive(message);
+							} catch (Exception e) {
+								LOGGER.error(BusManager.class
+										+ " receive error ! there is a advise that you had better catch the Exception in yourown endpoint method .", e);
+							}
+						}
+						@Override
+						public void onError(Throwable t) {
+							LOGGER.error(BusManager.class + " onError()", t);
+						}
+						@Override
+						public void onComplete() {
+							LOGGER.info(BusManager.class + " onComplete(");
+						}
+					});
 		}
 	}
-	@Override
-	protected void shutdown() {
-		if (disposable != null)
-			disposable.dispose();
-		disposable = null;
+	
+	synchronized void stop() {
+		running = false;
+		if (emitter != null)
+			emitter.onComplete();
+		emitter = null;
+		if (subscription != null)
+			subscription.cancel();
+		subscription = null;
 	}
 	public static synchronized void create(StreamBroker streamBroker, TerminalConfigurator terminalConfigurator){
 		if (instance == null) {

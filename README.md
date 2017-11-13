@@ -1,12 +1,12 @@
-# 消息总线 V1.0.2
+# 消息总线 V1.0.3
 基于Spring对异步消息进行抽象，将对生产者/消费者的操作抽象为对终端的操作；相关概念如下：<br/>
 Terminal：某个服务或应用<br/>
 TerminalNode：服务或应用的某个具体节点；一般指当前节点<br/>
+Endpoint：某服务或应用中的一个服务端点；类似SpringMVC的Controller；用于描述对消息的处理；严格按照文件目录结构构建；方法的返回只能是Void(不需要回执)或BusPayload(需要回执)<br/>
 BusMessage：消息；包含消息类型、消息内容类型、endpoint的value、消息载体、指定是否需要消息回执以及对回执的处理<br/>
 BusPayload：消息载体<br/>
-Endpoint：某服务或应用中的一个服务端点；类似SpringMVC的Controller；用于描述对消息的处理；严格按照文件目录结构构建；方法的返回只能是Void(不需要回执)或BusPayload(需要回执)<br/>
 
-默认Terminal的注册管理是ZooKeeper，MQ是RabbitMQ<br/>
+默认Terminal的注册管理是ZooKeeper，MQ是RabbitMQ；当某节点永久下线时需要手动删除ZooKeeper和RabbitMQ中对应的节点信息<br/>
 ##### Notice：若消息需要回执而消费端处理消息后未返回回执或返回Null，则消费端会抛出异常；但并不影响系统运行
 
 ###版本变更记录
@@ -31,6 +31,14 @@ Endpoint：某服务或应用中的一个服务端点；类似SpringMVC的Contro
 		<td>2017-11-06</td>
 		<td align="left">1.endpoint的处理方法参数由OriginalBusMessage修改为sourceTerminal和具体的BusPayload<br/>
 			2.各BusPayload的getValue返回不再是Object而是对应的数据类型
+		</td>
+	</tr>
+	<tr align='center'>
+		<td>V1.0.3</td>
+		<td>2017-11-13</td>
+		<td align="left">1.新增配置项可控制发送消息失败后的重复操作<br/>
+			2.BusManager不再负责资源释放,改由AbstractBusAccessor来负责<br/>
+			3.确定RabbitMQ使用发布确认模式而不是事务模式
 		</td>
 	</tr>
 </table>
@@ -76,15 +84,16 @@ Spring配置：
 	//busTemplate.post("terminal",busMessage,PostMode.RANDOM);
 	...
 	
-	Endpoint定义：
+	Endpoint定义(path不可重复,否则会启动时会抛异常)：
 	@Component
 	@BusRoot("/notice")
 	public class NoticeEndpoint{
 		//支付结果的处理(需要回执)
 		@BusEndpoint(value = "pay", contentType = MessageContentType.JSON)
-		public BusPayload payNotice(OriginalBusMessage message){
-			BusPayload receipt=null;
+		public BusPayload payNotice(String sourceTerminal,JSONBusPayload busPayload){
+			BusPayload receipt=JSONBusPayload();
 			...
+			receipt.setValue(someJSONString);
 			return receipt;
 		}
 		//绑卡结果的处理(不需要回执)

@@ -23,7 +23,7 @@ public class BytesBusPayload extends BusPayload {
 	@Override
 	public void setValue(Object value) {
 		if (!(value instanceof byte[]))
-			throw new IllegalArgumentException("BytesMessage's payload only the accept java.lang.byte[]");
+			throw new IllegalArgumentException("BytesMessage's payload only accept java.lang.byte[]");
 		this.value=(byte[])value;
 	}
 	@Override

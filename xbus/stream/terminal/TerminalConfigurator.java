@@ -120,7 +120,6 @@ public abstract class TerminalConfigurator extends ShutdownAware implements Stre
 			}
 		}
 	}
-
 	private boolean initiated = false;
 	public synchronized void init() {
 		if (!initiated) {

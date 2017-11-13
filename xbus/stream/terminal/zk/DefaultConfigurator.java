@@ -34,6 +34,7 @@ public class DefaultConfigurator extends TerminalConfigurator{
 	protected void release() throws Exception {
 		if (zookeeperListener != null) {
 			zookeeperListener.stop();
+			zookeeperListener = null;
 		}
 	}
 	

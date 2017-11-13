@@ -1,5 +1,7 @@
 package xbus.stream.broker;
 
+import java.util.function.Function;
+
 import xbus.stream.message.BusMessage;
 import xbus.stream.terminal.Terminal;
 import xbus.stream.terminal.TerminalConfigurator;
@@ -28,6 +30,12 @@ public interface StreamBroker {
 	 * @throws RuntimeException
 	 */
 	BusMessage consume(TerminalNode terminalNode) throws RuntimeException;
+
+	default void consume(Function<BusMessage, Boolean> consumer) throws RuntimeException {
+		consume(TerminalConfigurator.getCurrentTerminalNode(), consumer);
+	}
+	
+	void consume(TerminalNode terminalNode, Function<BusMessage, Boolean> consumer) throws RuntimeException;
 
 	default void produce(Terminal terminal, BusMessage message) throws RuntimeException {
 		produce(new Terminal[] { terminal }, message);

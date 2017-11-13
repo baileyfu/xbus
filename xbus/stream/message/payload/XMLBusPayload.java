@@ -28,7 +28,7 @@ public class XMLBusPayload extends BusPayload {
 	@Override
 	public void setValue(Object value) {
 		if (!(value instanceof String))
-			throw new IllegalArgumentException("XMLBusPayload's value only the accept java.lang.String");
+			throw new IllegalArgumentException("XMLBusPayload's value only accept java.lang.String");
 		this.value = (String) value;
 	}
 
