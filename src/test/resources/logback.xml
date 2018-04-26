@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>  
+<configuration>
+    <property name="LOG_PATH" value="c:/log/x" /><!-- 勿在 LogBack 的配置中使用相对路径--> 
+    <property name="LOG_XCOMMONS_PATH" value="${LOG_PATH}/commons" />
+	<property name="APP_Name" value="X" />  
+	 
+    <contextName>${APP_Name}</contextName>
+	
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    	<Encoding>UTF-8</Encoding>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">  
+            <Pattern>%d{HH:mm:ss.SSS} %-5level %logger{80} - %msg%n</Pattern>  
+        </encoder>
+    </appender>
+    <appender name="XCOMMONS" class="ch.qos.logback.core.rolling.RollingFileAppender">  
+        <Encoding>UTF-8</Encoding>  
+        <File>${LOG_XCOMMONS_PATH}/x_commons.log</File>  
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">  
+            <FileNamePattern>${LOG_XCOMMONS_PATH}/x_commons%d{yyyy-MM-dd}.log</FileNamePattern>  
+        </rollingPolicy>
+        <!--格式化输出：%d表示日期；%thread表示线程名；%-5level：级别从左显示5个字符宽度；%msg：日志消息；%n是换行符-->
+        <layout class="ch.qos.logback.classic.PatternLayout">  
+			<pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread]  %logger{50}  %n%msg%n</pattern>  
+        </layout>
+        <!--日志文件最大的大小-->
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+          <MaxFileSize>10MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+    
+    <!--日志异步到数据库 
+    <appender name="DB" class="ch.qos.logback.classic.db.DBAppender">
+        <connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">
+           <dataSource class="com.mchange.v2.c3p0.ComboPooledDataSource">
+              <driverClass>com.mysql.jdbc.Driver</driverClass>
+              <url>jdbc:mysql://127.0.0.1:3306/databaseName</url>
+              <user>root</user>
+              <password>root</password>
+            </dataSource>
+        </connectionSource>
+    </appender>-->
+    
+    <!-- Logger定义 -->
+    <!-- logger console没有设置appender，此loger本身不打印任何信息， addtivity设为true则会将信息往上级传递-->
+    <logger name="console" level="INFO" addtivity="true"/>
+    <logger name="x_commons" level="INFO" addtivity="false">
+    	<!-- 将x_commons日志同时输出到控制台和文件 -->
+    	<appender-ref ref="STDOUT" />
+    	<appender-ref ref="XCOMMONS" />
+    </logger>
+    <logger name="com.x.service" level="TRACE" />
+ 	
+ 	<root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
