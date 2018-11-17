@@ -1,14 +1,13 @@
-package xbus.stream.broker;
+package com.lz.components.bus.stream.broker;
 
-import java.util.function.Function;
+import java.util.Set;
 
-import xbus.stream.message.BusMessage;
-import xbus.stream.terminal.Terminal;
-import xbus.stream.terminal.TerminalConfigurator;
-import xbus.stream.terminal.TerminalNode;
+import com.lz.components.bus.stream.message.BusMessage;
+import com.lz.components.bus.stream.terminal.Terminal;
+import com.lz.components.bus.stream.terminal.TerminalNode;
 
 /**
- * 消息处理接口
+ * 消息流代理
  * 
  * @author bailey
  * @version 1.0
@@ -16,27 +15,21 @@ import xbus.stream.terminal.TerminalNode;
  */
 public interface StreamBroker {
 	/**
-	 * 消费当前节点的消息
-	 * @return
-	 * @throws RuntimeException
+	 * 初始化当前终端对应的处理通道<br/>
+	 * 
+	 * MQ实现方式：针对terminalName+endpoint分别建立Topic和Queue，各MQ实现细节不同
+	 * 
+	 * @param currentTerminalNode 当前服务节点
+	 * @param endpointList 当前服务所提供的endpoint
+	 * @throws Exception
 	 */
-	default BusMessage consume() throws RuntimeException {
-		return consume(TerminalConfigurator.getCurrentTerminalNode());
-	}
+	public void initializeChannel(TerminalNode currentTerminalNode,Set<String> endpointList) throws Exception;
 	/**
-	 * 消费指定节点的消息
-	 * @param terminalNode
-	 * @return
-	 * @throws RuntimeException
+	 * 释放通道相关资源
+	 * @throws Exception
 	 */
-	BusMessage consume(TerminalNode terminalNode) throws RuntimeException;
-
-	default void consume(Function<BusMessage, Boolean> consumer) throws RuntimeException {
-		consume(TerminalConfigurator.getCurrentTerminalNode(), consumer);
-	}
+	public void destoryChannel() throws Exception;
 	
-	void consume(TerminalNode terminalNode, Function<BusMessage, Boolean> consumer) throws RuntimeException;
-
 	default void produce(Terminal terminal, BusMessage message) throws RuntimeException {
 		produce(new Terminal[] { terminal }, message);
 	}

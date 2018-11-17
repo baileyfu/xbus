@@ -1,9 +1,9 @@
-package xbus.stream.message;
+package com.lz.components.bus.stream.message;
 
 import java.util.function.Consumer;
 
-import xbus.em.MessageType;
-import xbus.stream.message.payload.BusPayload;
+import com.lz.components.bus.em.MessageType;
+import com.lz.components.bus.stream.message.payload.BusPayload;
 
 /**
  * 原消息
@@ -14,11 +14,11 @@ import xbus.stream.message.payload.BusPayload;
  */
 public class OriginalBusMessage extends BusMessage {
 	/**
-	 * 是否发送到当前节点
+	 * 是否发送到当前节点;默认true
 	 */
 	private boolean useCurrentNode;
 	/**
-	 * 需要回执
+	 * 需要回执;默认false
 	 */
 	private boolean requireReceipt;
 	/**
@@ -34,7 +34,7 @@ public class OriginalBusMessage extends BusMessage {
 		init();
 	}
 	private void init(){
-		useCurrentNode = false;
+		useCurrentNode = true;
 		requireReceipt = false;
 		this.messageType=MessageType.ORIGINAL;
 	}

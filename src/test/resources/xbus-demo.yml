@@ -1,0 +1,37 @@
+components: 
+  bus: 
+    enable: false #会覆盖所有总线的配置;注意：总线关闭后,消费不会启动而且调用template的post不会抛错
+    biz: #总线名字;以此名+BusTemplate为注入的BusTemplate对象的BeanName
+      enable: true
+      asyncAble: false
+      accessInterval: 100 #控制访问总线(消费消息)的间隔,大于100ms
+      broker: 
+        rocket:
+          durable: true
+          consumeRetryAble: true
+          consumeRetryCount: 16
+          consumerTimeoutMillis: 900000
+          produceRetryAble: true
+          produceRetryCount: 2
+          producerTimeoutMillis: 3000
+          durable: true
+          nameSrvAddr: 127.0.0.1:9876
+          topicQueueNums: 8
+          pullBatchSize: 32
+          consumeBatchSize: 1
+      terminal:
+        #当前终端的信息
+        serverName: serviceId
+        ip: 127.0.0.1
+        port: 8201
+        file: #配置文件指定终端信息
+          servers:
+            - serverName: serviceId
+              nodeInfo: 
+                - ip: 127.0.0.1
+                  port: 8203
+                - ip: 127.0.0.2
+                  port: 8203
+        zk: #zk配置终端信息
+          rootPath: /xbus
+          servers: 10.16.3.103:2181,10.16.3.104:2181,10.16.3.105:2181

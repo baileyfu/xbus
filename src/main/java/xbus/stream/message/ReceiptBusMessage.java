@@ -1,7 +1,7 @@
-package xbus.stream.message;
+package com.lz.components.bus.stream.message;
 
-import xbus.em.MessageType;
-import xbus.stream.message.payload.BusPayload;
+import com.lz.components.bus.em.MessageType;
+import com.lz.components.bus.stream.message.payload.BusPayload;
 
 /**
  * 回执消息

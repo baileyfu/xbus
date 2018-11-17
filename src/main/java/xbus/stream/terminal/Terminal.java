@@ -1,4 +1,4 @@
-package xbus.stream.terminal;
+package com.lz.components.bus.stream.terminal;
 
 import java.util.Set;
 import java.util.function.Consumer;

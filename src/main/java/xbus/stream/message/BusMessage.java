@@ -1,8 +1,8 @@
-package xbus.stream.message;
+package com.lz.components.bus.stream.message;
 
-import xbus.em.MessageContentType;
-import xbus.em.MessageType;
-import xbus.stream.message.payload.BusPayload;
+import com.lz.components.bus.em.MessageContentType;
+import com.lz.components.bus.em.MessageType;
+import com.lz.components.bus.stream.message.payload.BusPayload;
 
 /**
  * 消息定义
@@ -20,6 +20,8 @@ public abstract class BusMessage {
 	private String path;
 	private String sourceTerminal;
 	private BusPayload busPayload;
+	/** 消息ID */
+	private String messageId;
 
 	public BusMessage() {
 		this.transactional = false;
@@ -69,5 +71,17 @@ public abstract class BusMessage {
 	
 	public byte[] payload2Bytes() {
 		return busPayload == null ? null : busPayload.toBytes();
+	}
+	public String getMessageId() {
+		return messageId;
+	}
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
+	}
+	@Override
+	public String toString() {
+		return "BusMessage [transactional=" + transactional + ", messageType=" + messageType + ", path=" + path
+				+ ", sourceTerminal=" + sourceTerminal + ", busPayload=" + busPayload + ", messageId=" + messageId
+				+ "]";
 	}
 }

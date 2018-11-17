@@ -1,4 +1,4 @@
-package xbus.stream.terminal.zk;
+package com.lz.components.bus.stream.terminal.zk;
 
 import java.util.HashSet;
 import java.util.List;
@@ -14,9 +14,9 @@ import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 
-import xbus.stream.StreamLoggerHolder;
-import xbus.stream.terminal.Terminal;
-import xbus.stream.terminal.TerminalNode;
+import com.lz.components.bus.stream.terminal.Terminal;
+import com.lz.components.bus.stream.terminal.TerminalNode;
+import com.lz.components.common.log.holder.CommonLoggerHolder;
 
 /**
  * 监听ZooKeeper变动;单例实现;系统关闭时需调用stop释放资源
@@ -25,7 +25,7 @@ import xbus.stream.terminal.TerminalNode;
  * @version 1.0
  * @date 2017-11-03 10:45
  */
-public final class ZookeeperListener implements StreamLoggerHolder{
+public final class ZookeeperListener implements CommonLoggerHolder{
 	private static ZookeeperListener instance;
 
 	private String rootPath;
@@ -114,7 +114,7 @@ public final class ZookeeperListener implements StreamLoggerHolder{
 					if (node.length == 2) {
 						TerminalNode terminalNode = new TerminalNode(terminalName);
 						terminalNode.setIp(node[0]);
-						terminalNode.setPort(node[1]);
+						terminalNode.setPort(Integer.parseInt(node[1]));
 						nodes.add(terminalNode);
 					}
 				}
@@ -134,7 +134,7 @@ public final class ZookeeperListener implements StreamLoggerHolder{
 				if(node.length==2){
 					TerminalNode terminalNode = new TerminalNode(terminalName);
 					terminalNode.setIp(node[0]);
-					terminalNode.setPort(node[1]);
+					terminalNode.setPort(Integer.parseInt(node[1]));
 					nodes.add(terminalNode);
 				}
 			}

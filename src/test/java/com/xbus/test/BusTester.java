@@ -1,17 +1,20 @@
-package com.xbus.test;
+package com.lz.components.bus;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.alibaba.fastjson.JSONObject;
+import com.lz.components.bus.annotation.BusEndpoint;
+import com.lz.components.bus.annotation.BusRoot;
+import com.lz.components.bus.core.config.BusConfigurator;
+import com.lz.components.bus.em.MessageContentType;
+import com.lz.components.bus.em.PostMode;
+import com.lz.components.bus.stream.message.OriginalBusMessage;
+import com.lz.components.bus.stream.message.payload.JSONBusPayload;
 
-import xbus.annotation.BusEndpoint;
-import xbus.annotation.BusRoot;
-import xbus.core.AsyncBusTemplate;
-import xbus.em.MessageContentType;
-import xbus.em.PostMode;
-import xbus.stream.message.OriginalBusMessage;
-import xbus.stream.message.payload.JSONBusPayload;
 
 /**
  * 
@@ -19,10 +22,17 @@ import xbus.stream.message.payload.JSONBusPayload;
  * @version 1.0
  * @date 2017-10-20 17:24
  */
-@Component
 @BusRoot("/notice")
+@ContextConfiguration(locations="classpath:spring-demo.xml")
+@RunWith(SpringJUnit4ClassRunner.class)
 public class BusTester {
 	@Autowired
+	BusConfigurator ymlConfig;
+	@Test
+	public void test(){
+		System.out.println();
+	}
+//	@Autowired
 	private AsyncBusTemplate busTemplate;
 
 	@BusEndpoint(value = "pay", contentType = MessageContentType.JSON)
@@ -47,7 +57,7 @@ public class BusTester {
 		busMessage.setPath("/notice/pay");
 		busMessage.setRequireReceipt(true);
 		busMessage.setReceiptConsumer(System.out::println);
-		busTemplate.post(terminalName, busMessage, PostMode.RANDOM);
+		busTemplate.post(busMessage, PostMode.RANDOM,terminalName);
 	}
 
 	public static void main(String[] args) throws Exception {

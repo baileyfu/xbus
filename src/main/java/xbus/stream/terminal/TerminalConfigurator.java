@@ -1,91 +1,48 @@
-package xbus.stream.terminal;
+package com.lz.components.bus.stream.terminal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ConfigurableApplicationContext;
-
-import xbus.core.ShutdownAware;
-import xbus.stream.StreamLoggerHolder;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 终端配置器; <br/>
- * 实时维护终端及其节点信息;系统关闭时会释放资源
+ * 实时维护终端及其节点信息;终端类型必须为Terminal而非其子类
  * 
  * @author bailey
  * @version 1.0
  * @date 2017-10-20 17:25
  */
-public abstract class TerminalConfigurator extends ShutdownAware implements StreamLoggerHolder,ApplicationContextAware {
-	// 当前Terminal名字
-	private static String CURRENT_TERMINAL_NAME;
+public abstract class TerminalConfigurator{
 	// 当前服务的TerminalNode;
-	private static TerminalNode CURRENT_TERMINAL_NODE;
-	
-	private ApplicationContext applicationContext;
+	public static TerminalNode CURRENT_TERMINAL_NODE;
 	//当前所有的Termnal
-	private Terminal[] lastest_terminals = null;
-	private TerminalInitializingMonitor terminalInitializingMonitor;
-	@Value("${xbus.stream.errorExit}")
-	private boolean errorExit;
-	@Value("${xbus.appName}")
+	private Map<String,Terminal> lastestTerminals = null;
 	protected String appName;
-	protected String host;
-	protected String ip;
-	protected String port;
 
-	public TerminalConfigurator() {
-		errorExit = true;
-		port = "0";
-		try {
-			InetAddress address = InetAddress.getLocalHost();
-			ip = address.getHostAddress();
-			host = address.getHostName();
-		} catch (UnknownHostException e) {
-			LOGGER.error("xbus.stream.terminal.Configurator getLocalHost error!", e);
-			throw new RuntimeException(e);
-		}
-		CURRENT_TERMINAL_NAME = appName;
+	public TerminalConfigurator(String appName, String ip, int port) {
+		this.appName = appName;
+		lastestTerminals = new HashMap<>();
 		CURRENT_TERMINAL_NODE = new TerminalNode(appName);
-		fillCurrentNode();
-	}
-
-	protected void fillCurrentNode() {
 		CURRENT_TERMINAL_NODE.setIp(ip);
 		CURRENT_TERMINAL_NODE.setPort(port);
 	}
-	public void setTerminalInitializingMonitor(TerminalInitializingMonitor terminalInitializingMonitor) {
-		this.terminalInitializingMonitor = terminalInitializingMonitor;
+	protected void fillCurrentNode(String ip,int port) {
+		CURRENT_TERMINAL_NODE.setIp(ip);
+		CURRENT_TERMINAL_NODE.setPort(port);
 	}
 	
 	public Terminal getTerminal(String terminalName){
-		if(lastest_terminals==null||lastest_terminals.length==0)
-			return null;
-		for (Terminal t : lastest_terminals) {
-			if (terminalName.equals(t.getName())) {
-				return t;
-			}
-		}
-		return null;
+		return lastestTerminals.get(terminalName);
 	}
 	/**
 	 * 当前所有Terminal及其节点
 	 * 
 	 * @return
 	 */
-	public Terminal[] takeCurrentTerminals() {
-		if (lastest_terminals == null)
-			return null;
-		return Arrays.copyOf(lastest_terminals, lastest_terminals.length);
-	}
 	public Terminal[] getCurrentTerminals() {
-		return lastest_terminals;
+		return lastestTerminals.values().toArray(new Terminal[lastestTerminals.size()]);
 	}
 	/**
 	 * 更新最新的终端信息
@@ -94,9 +51,13 @@ public abstract class TerminalConfigurator extends ShutdownAware implements Stre
 	 */
 	protected void updateTerminal(Set<Terminal> terminals) {
 		if (terminals == null || terminals.size() == 0) {
-			lastest_terminals = null;
+			lastestTerminals.clear();
 		} else {
-			lastest_terminals = terminals.toArray(new Terminal[terminals.size()]);
+			Map<String, Terminal> temp = new HashMap<>();
+			for (Terminal terminal : terminals) {
+				temp.put(terminal.getName(), terminal);
+			}
+			lastestTerminals = temp;
 		}
 	}
 	/***
@@ -106,60 +67,38 @@ public abstract class TerminalConfigurator extends ShutdownAware implements Stre
 	 * @param nodes
 	 */
 	protected synchronized void updateTerminalNode(String terminalName, Set<TerminalNode> nodes) {
-		if (lastest_terminals == null) {
-			Terminal terminal = new Terminal();
+		Terminal terminal = lastestTerminals.get(terminalName);
+		if (terminal == null) {
+			terminal = new Terminal();
 			terminal.setName(terminalName);
 			terminal.setNodes(nodes);
-			lastest_terminals = new Terminal[]{terminal};
-		} else {
-			for (Terminal t : lastest_terminals) {
-				if (terminalName.equals(t.getName())) {
-					t.setNodes(nodes);
-					break;
-				}
-			}
+			lastestTerminals.put(terminalName, terminal);
+		}else{
+			terminal.setNodes(nodes);
 		}
 	}
-	private boolean initiated = false;
-	public synchronized void init() {
-		if (!initiated) {
-			try {
-				terminalInitializingMonitor.initializeChannel(CURRENT_TERMINAL_NODE);
-				listen();
-				initiated = true;
-			} catch (Exception e) {
-				LOGGER.error("xbus.stream.terminal.Configurator update terminals error!", e);
-				//初始化失败则终止程序
-				if (errorExit) {
-					LOGGER.info("The error of the xbus.stream.Configurator.init() has caused System break down...");
-					((ConfigurableApplicationContext) applicationContext).close();
-					System.exit(-1);
-				}
-			}
+	private boolean listened = false;
+	public synchronized void start() throws Exception{
+		if (!listened) {
+			listen();
+			listened = true;
 		}
 	}
-	@Override
-	protected void shutdown() {
-		try{
-			release();
-		}catch(Exception e){
-			LOGGER.error("Configurator.destory() error!", e);
-		}
+
+	public void stop() throws Exception{
+		release();
+		listened = false;
 	}
 	/**
 	 * 初始化完成后应调用的方法<br/>
 	 * 监听terminal的变动然后调用update方法
 	 */
-	protected abstract void listen();
+	protected abstract void listen()throws Exception;
 	/**
 	 * 释放监听相关资源
 	 */
-	protected abstract void release() throws Exception;
-	@Override
-	public void setApplicationContext(ApplicationContext paramApplicationContext) throws BeansException {
-		applicationContext = paramApplicationContext;
-	}
-	
+	protected abstract void release()throws Exception;
+
 	/************************************static method**************************************/
 	/**
 	 * 当前节点所属Terminal
@@ -167,7 +106,7 @@ public abstract class TerminalConfigurator extends ShutdownAware implements Stre
 	 * @return
 	 */
 	public static String getCurrentTerminalName() {
-		return CURRENT_TERMINAL_NAME;
+		return CURRENT_TERMINAL_NODE==null?StringUtils.EMPTY:CURRENT_TERMINAL_NODE.getTerminalName();
 	}
 	/**
 	 * 当前节点

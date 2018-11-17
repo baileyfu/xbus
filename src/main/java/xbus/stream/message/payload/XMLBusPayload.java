@@ -1,9 +1,10 @@
-package xbus.stream.message.payload;
+package com.lz.components.bus.stream.message.payload;
 
-import xbus.em.MessageContentType;
+import com.lz.components.bus.em.MessageContentType;
 
 /**
- * 暂时保存为String
+ * 暂时保存为String<br/>
+ * 因text/html默认使用us-ascii编码，仅支持application/xml；XML内容需有encoding
  * 
  * @author bailey
  * @version 1.0

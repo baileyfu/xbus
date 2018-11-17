@@ -1,4 +1,4 @@
-package xbus.em;
+package com.lz.components.bus.em;
 
 /**
  * 消息类型

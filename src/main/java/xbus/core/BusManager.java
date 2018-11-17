@@ -1,59 +1,64 @@
-package xbus.core;
+package com.lz.components.bus.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apache.http.util.Asserts;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
-import commons.fun.NAFunction;
+import com.lz.components.bus.core.config.BusConfigBean;
+import com.lz.components.bus.em.MessageType;
+import com.lz.components.bus.em.PostMode;
+import com.lz.components.bus.stream.broker.AutoConsumeStreamBroker;
+import com.lz.components.bus.stream.broker.ConsumeReceipt;
+import com.lz.components.bus.stream.broker.ManualConsumeStreamBroker;
+import com.lz.components.bus.stream.broker.StreamBroker;
+import com.lz.components.bus.stream.message.BusMessage;
+import com.lz.components.bus.stream.message.OriginalBusMessage;
+import com.lz.components.bus.stream.message.ReceiptBusMessage;
+import com.lz.components.bus.stream.message.payload.BusPayload;
+import com.lz.components.bus.stream.terminal.Terminal;
+import com.lz.components.bus.stream.terminal.TerminalConfigurator;
+import com.lz.components.common.log.holder.CommonLoggerHolder;
+import com.lz.components.common.util.variable.ActionGenerator;
+
 import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.FlowableEmitter;
-import io.reactivex.schedulers.Schedulers;
-import xbus.BusLoggerHolder;
-import xbus.em.MessageType;
-import xbus.em.PostMode;
-import xbus.stream.broker.AbstractStreamBroker;
-import xbus.stream.broker.StreamBroker;
-import xbus.stream.message.BusMessage;
-import xbus.stream.message.OriginalBusMessage;
-import xbus.stream.message.ReceiptBusMessage;
-import xbus.stream.message.payload.BusPayload;
-import xbus.stream.terminal.Terminal;
-import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 总线管理器<br/>
- * 单例实现;系统关闭时会释放资源
+ * 系统关闭时负责释放资源
  * 
  * @author bailey
  * @version 1.0
  * @date 2017-10-30 09:28
  */
-public final class BusManager implements BusLoggerHolder {
-	private static BusManager instance;
-	
+public final class BusManager implements CommonLoggerHolder {
+	//总线名
+	private String name;
 	private StreamBroker streamBroker;
 	private TerminalConfigurator terminalConfigurator;
 	private Map<String, BiFunction<String,BusPayload, BusPayload>> endpointHandlers;
 	private Map<String, Consumer<BusPayload>> endpointReplyHandlers;
 	private boolean running;
-	private FlowableEmitter<BusMessage> emitter;
-	private Subscription subscription;
+	private ActionGenerator actionGenerator;
+	//消费间隔(默认100ms)
+	private long consumeIntervalMills;
 
-	protected BusManager(StreamBroker streamBroker, TerminalConfigurator terminalConfigurator) {
+	protected BusManager(String name,StreamBroker streamBroker, TerminalConfigurator terminalConfigurator) {
+		this.name = name;
 		this.streamBroker = streamBroker;
 		this.terminalConfigurator = terminalConfigurator;
 		endpointHandlers = new HashMap<>();
 		endpointReplyHandlers = new HashMap<>();
 		running = false;
-		emitter = null;
-		subscription = null;
+		consumeIntervalMills = BusConfigBean.DEFAULT_ACCESS_INTERVAL;
 	}
 
 	/**
@@ -118,38 +123,23 @@ public final class BusManager implements BusLoggerHolder {
 		}
 		streamBroker.produce(terminals, pretreat(message));
 	}
-
-	/**
-	 * 按指定发送模式发送给指定终端
-	 * 
-	 * @param terminalName
-	 * @param message
-	 * @param postMode
-	 */
-	public void post(String terminalName, BusMessage message, PostMode postMode) {
-		Asserts.notEmpty(terminalName, "terminalName");
-		Terminal target = terminalConfigurator.getTerminal(terminalName);
-		Asserts.notNull(target, "terminal(" + terminalName + ")");
-		Terminal terminal=postMode.buildTerminal();
-		terminal.setName(target.getName());
-		terminal.referNodes(target);
-		streamBroker.produce(terminal, pretreat(message));
-	}
 	/**
 	 * 按节点发送策略将消息发送到指定终端
-	 * 
-	 * @param terminalNames
-	 * @param path
 	 * @param message
 	 * @param postMode
+	 * @param terminalNames 目标终端服务名
 	 */
-	public void post(Set<String> terminalNames, BusMessage message, PostMode postMode) {
-		if (terminalNames == null || terminalNames.size() == 0) {
+	public void post(BusMessage message, PostMode postMode,String...terminalNames) {
+		if (terminalNames.length == 0) {
 			throw new IllegalStateException("terminalNames can not be empty");
 		}
-		Terminal[] terminals=new Terminal[terminalNames.size()];
+		Set<String> uniqueTerminalName = new HashSet<>();
+		for(String terminalName:terminalNames){
+			uniqueTerminalName.add(terminalName);
+		}
+		Terminal[] terminals=new Terminal[uniqueTerminalName.size()];
 		int i=0;
-		for (String terminalName:terminalNames) {
+		for (String terminalName:uniqueTerminalName) {
 			Terminal target = terminalConfigurator.getTerminal(terminalName);
 			Asserts.notNull(target, "terminal(" + terminalName + ")");
 			terminals[i]=postMode.buildTerminal();
@@ -158,119 +148,98 @@ public final class BusManager implements BusLoggerHolder {
 		}
 		streamBroker.produce(terminals, pretreat(message));
 	}
-
-	/**
-	 * 处理接收到的消息
-	 * 
-	 * @param message
-	 * @throws Exception
-	 */
-	private void receive(BusMessage message) throws Exception {
-		String sourceTerminalName = message.getSourceTerminal();
-		String path = message.getPath();
-		if(message.getMessageType()==MessageType.ORIGINAL){
-			OriginalBusMessage originalMessage = (OriginalBusMessage) message;
-			BiFunction<String,BusPayload, BusPayload> handler = endpointHandlers.get(path);
-			Asserts.check(handler != null, "the originalBusMessageHandler of path '" + path + "' of " + sourceTerminalName + " does not exist!");
-			BusPayload receipt = handler.apply(originalMessage.getSourceTerminal(), originalMessage.getPayLoad());
-			if (originalMessage.isRequireReceipt()) {
-				Asserts.check(receipt != null, "the path '" + path + "' of " + sourceTerminalName + "' require receipt , but the receipt is null!");
-				Terminal sourceTerminal = terminalConfigurator.getTerminal(sourceTerminalName);
-				Asserts.check(sourceTerminal != null, "receipt error! the source terminal '" + sourceTerminalName + "' does not exist!");
-				streamBroker.produce(sourceTerminal, new ReceiptBusMessage(receipt));
+	/** 消息处理器 */
+	private Function<List<BusMessage>,List<ConsumeReceipt>> consumer=(msgList)->{
+		List<ConsumeReceipt> receiptList = new ArrayList<>();
+		try{
+			for (BusMessage message : msgList) {
+				String sourceTerminalName = message.getSourceTerminal();
+				String path = message.getPath();
+				if (message.getMessageType() == MessageType.ORIGINAL) {
+					OriginalBusMessage originalMessage = (OriginalBusMessage) message;
+					BiFunction<String, BusPayload, BusPayload> handler = endpointHandlers.get(path);
+					Asserts.check(handler != null, "the originalBusMessageHandler of path '" + path + "' of "+sourceTerminalName + " does not exist!");
+					BusPayload receipt = handler.apply(originalMessage.getSourceTerminal(),originalMessage.getPayLoad());
+					if (originalMessage.isRequireReceipt()) {
+						Asserts.check(receipt != null, "the path '" + path + "' of " + sourceTerminalName+ "' require receipt , but the receipt is null!");
+						Terminal sourceTerminal = terminalConfigurator.getTerminal(sourceTerminalName);
+						Asserts.check(sourceTerminal != null,"receipt error! the source terminal '" + sourceTerminalName + "' does not exist!");
+						streamBroker.produce(sourceTerminal, new ReceiptBusMessage(receipt));
+					}
+				} else {
+					Consumer<BusPayload> handler = endpointReplyHandlers.get(path);
+					Asserts.check(handler != null, "the receiptBusMessageHandler of path '" + path + "' of "+ sourceTerminalName + " does not exist!");
+					handler.accept(message.getPayLoad());
+				}
+				ConsumeReceipt consumeReceipt = new ConsumeReceipt(message.getMessageId());
+				consumeReceipt.ackSuccess();
+				receiptList.add(consumeReceipt);
 			}
-		}else{
-			Consumer<BusPayload> handler = endpointReplyHandlers.get(path);
-			Asserts.check(handler != null, "the receiptBusMessageHandler of path '" + path + "' of " + sourceTerminalName + " does not exist!");
-			handler.accept(message.getPayLoad());
+		} catch (Exception e) {
+			LOGGER.error("consume message error", e);
 		}
-	}
+		return receiptList;
+	};
 	/**
 	 * 生产/消费失败不可回滚/重试
 	 */
-	synchronized void start() {
-		doStartWithRx(((AbstractStreamBroker) streamBroker).isConsumeRetryAble() ? 
-				() -> {
-					streamBroker.consume((busMessage) -> {
+	synchronized void start() throws Exception{
+		if (!running) {
+			running = true;
+			terminalConfigurator.start();
+			streamBroker.initializeChannel(TerminalConfigurator.getCurrentTerminalNode(), endpointReplyHandlers.keySet());
+			//由Broker负责拉取消息
+			if (streamBroker instanceof AutoConsumeStreamBroker) {
+				((AutoConsumeStreamBroker) streamBroker).startReceive(consumeIntervalMills, consumer);
+			} else {// 由BusManager拉取消息
+				String busAlias = "BusManager(" + name + ")";
+				actionGenerator = new ActionGenerator(consumeIntervalMills, TimeUnit.MILLISECONDS, () -> {
+					try {
+						((ManualConsumeStreamBroker) streamBroker).consume(TerminalConfigurator.getCurrentTerminalNode(),consumer);
+					} catch (Exception e) {
+						LOGGER.error(busAlias + " consume error !", e);
+						// 消费出错后暂停100ms
 						try {
-							receive(busMessage);
-							return true;
-						} catch (Exception e) {
-							LOGGER.error(BusManager.class + " receive error ! xbus will rollback this consumption and try consume again .", e);
+							Thread.sleep(100l);
+						} catch (InterruptedException ie) {
+							LOGGER.error(busAlias + " Thread.sleep() error", ie);
 						}
-						return false;
-					});
-				} : () -> {
-					BusMessage message = streamBroker.consume();
-					if (message != null) {
-						emitter.onNext(message);
-						subscription.request(Long.MAX_VALUE);
 					}
 				});
-	}
-	private void doStartWithRx(NAFunction doEmit) {
-		if (!running) {
-			stop();
-			running = true;
-			Flowable.<BusMessage>create((emt) -> {
-						this.emitter = emt;
-						while (running) {
-							try {
-								doEmit.apply();
-							} catch (Exception e) {
-								LOGGER.error(BusManager.class + " consume error !", e);
-								// 出错后暂停100ms
-								try {
-									Thread.sleep(100l);
-								} catch (InterruptedException ie) {
-									LOGGER.error(BusManager.class + " Thread.sleep() error", ie);
-								}
-							}
-						}
-					}, BackpressureStrategy.BUFFER)
-					.observeOn(Schedulers.newThread())
-					.subscribeOn(Schedulers.io())
-					.subscribe(new Subscriber<BusMessage>(){
-						@Override
-						public void onSubscribe(Subscription s) {
-							subscription = s;
-						}
-						@Override
-						public void onNext(BusMessage message) {
-							try {
-								receive(message);
-							} catch (Exception e) {
-								LOGGER.error(BusManager.class
-										+ " receive error ! there is a advise that you had better catch the Exception in yourown endpoint method .", e);
-							}
-						}
-						@Override
-						public void onError(Throwable t) {
-							LOGGER.error(BusManager.class + " onError()", t);
-						}
-						@Override
-						public void onComplete() {
-							LOGGER.info(BusManager.class + " onComplete(");
-						}
-					});
+				actionGenerator.setName(busAlias);
+				actionGenerator.start(BackpressureStrategy.LATEST);
+			}
 		}
 	}
 	
-	synchronized void stop() {
-		running = false;
-		if (emitter != null)
-			emitter.onComplete();
-		emitter = null;
-		if (subscription != null)
-			subscription.cancel();
-		subscription = null;
-	}
-	public static synchronized void create(StreamBroker streamBroker, TerminalConfigurator terminalConfigurator){
-		if (instance == null) {
-			instance = new BusManager(streamBroker, terminalConfigurator);
+	synchronized void stop() throws Exception {
+		if (running) {
+			if (streamBroker instanceof AutoConsumeStreamBroker) {
+				((AutoConsumeStreamBroker) streamBroker).stopReceive();
+			} else {
+				actionGenerator.stop();
+			}
+			streamBroker.destoryChannel();
+			terminalConfigurator.stop();
+			running = false;
 		}
 	}
-	public static BusManager getInstance() {
-		return instance;
+
+	public long getConsumeIntervalMills() {
+		return consumeIntervalMills;
+	}
+
+	/**
+	 * 消费间隔不得小于100ms
+	 * 
+	 * @param consumeIntervalMills
+	 */
+	public void setConsumeIntervalMills(long consumeIntervalMills) {
+		Asserts.check(consumeIntervalMills > 99, name+"'s accessInterval can not less than 100!");
+		this.consumeIntervalMills = consumeIntervalMills;
+	}
+
+	public String getName(){
+		return name;
 	}
 }

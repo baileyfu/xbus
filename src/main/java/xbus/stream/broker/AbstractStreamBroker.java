@@ -1,17 +1,13 @@
-package xbus.stream.broker;
+package com.lz.components.bus.stream.broker;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.apache.http.util.Asserts;
-import org.springframework.beans.factory.annotation.Value;
 
-import xbus.stream.StreamLoggerHolder;
-import xbus.stream.message.BusMessage;
-import xbus.stream.terminal.Terminal;
-import xbus.stream.terminal.TerminalInitializingMonitor;
-import xbus.stream.terminal.TerminalNode;
+import com.lz.components.bus.stream.message.BusMessage;
+import com.lz.components.bus.stream.terminal.Terminal;
+import com.lz.components.common.log.holder.CommonLoggerHolder;
 
 /**
  * 
@@ -19,27 +15,20 @@ import xbus.stream.terminal.TerminalNode;
  * @version 1.0
  * @date 2017-10-20 17:26
  */
-public abstract class AbstractStreamBroker implements StreamLoggerHolder, StreamBroker, TerminalInitializingMonitor {
+public abstract class AbstractStreamBroker implements CommonLoggerHolder, StreamBroker {
+	protected static final String NAME_PREFIX="BUS_";
 	//consumer
-	@Value("${xbus.stiream.broker.producer.retryAble}")
 	protected boolean consumeRetryAble;
-	@Value("${xbus.stiream.broker.consumer.retryCount}")
 	protected int consumeRetryCount;
-	@Value("${xbus.stiream.broker.consumer.timeoutMillis}")
 	protected long consumerTimeoutMillis;
 	//producer
-	@Value("${xbus.stiream.broker.producer.retryAble}")
 	protected boolean produceRetryAble;
-	@Value("${xbus.stiream.broker.producer.retryCount}")
 	protected int produceRetryCount;
-	@Value("${xbus.stiream.broker.producer.timeoutMillis}")
 	protected long producerTimeoutMillis;
 	//other
-	@Value("${xbus.stiream.broker.durable}")
 	protected boolean durable;
-	
-	private ConcurrentHashMap<String, Integer> producerRetryReferee = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, Integer> consumerRetryReferee = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, Integer> producerRetryReferee;
+	private ConcurrentHashMap<String, Integer> consumerRetryReferee;
 	//重试消费次数
 	protected Predicate<String> retryConsume = (key) -> {
 		Integer counter = consumerRetryReferee.get(key);
@@ -52,7 +41,7 @@ public abstract class AbstractStreamBroker implements StreamLoggerHolder, Stream
 		}
 		return retryAble;
 	};
-	//重试发送次数
+	// 重试发送次数
 	protected Predicate<String> retryProduce = (key) -> {
 		Integer counter = producerRetryReferee.get(key);
 		counter = counter == null ? 1 : counter + 1;
@@ -64,22 +53,19 @@ public abstract class AbstractStreamBroker implements StreamLoggerHolder, Stream
 		}
 		return retryAble;
 	};
-	public AbstractStreamBroker(){
-		
+	
+	public AbstractStreamBroker(BrokerConfigBean brokerConfig) {
+		consumeRetryAble = brokerConfig.isConsumeRetryAble();
+		consumeRetryCount = brokerConfig.getConsumeRetryCount();
+		consumerTimeoutMillis = brokerConfig.getConsumerTimeoutMillis();
+		produceRetryAble = brokerConfig.isProduceRetryAble();
+		produceRetryCount = brokerConfig.getProduceRetryCount();
+		producerTimeoutMillis = brokerConfig.getProducerTimeoutMillis();
+		durable = brokerConfig.isDurable();
+		producerRetryReferee = new ConcurrentHashMap<>();
+		consumerRetryReferee = new ConcurrentHashMap<>();
 	}
-	@Override
-	public BusMessage consume(TerminalNode terminalNode) throws RuntimeException {
-		Asserts.notNull(terminalNode, "terminalNode");
-		return receive(terminalNode);
-	}
-	@Override
-	public void consume(TerminalNode terminalNode, Function<BusMessage, Boolean> consumer) throws RuntimeException {
-		Asserts.notNull(terminalNode, "terminalNode");
-		receive(terminalNode,consumer);
-	}
-	protected abstract BusMessage receive(TerminalNode terminalNode) throws RuntimeException;
-	protected abstract void receive(TerminalNode terminalNode, Function<BusMessage, Boolean> consumer) throws RuntimeException;
-
+	
 	@Override
 	public void produce(Terminal[] terminals, BusMessage message) throws RuntimeException {
 		Asserts.check(terminals != null && terminals.length > 0, "terminals can not be empty");
@@ -98,6 +84,18 @@ public abstract class AbstractStreamBroker implements StreamLoggerHolder, Stream
 	}
 	public boolean isProduceRetryAble() {
 		return produceRetryAble;
+	}
+
+	protected String legalizeName(String source, String... suffixes) {
+		StringBuilder temp = new StringBuilder(NAME_PREFIX);
+		temp.append(source.replaceAll("\\/","-").replaceAll("\\\\","-").replaceAll("\\.", "-").replaceAll("\\:", "-"));
+		if (suffixes.length > 0) {
+			for (String suffix : suffixes) {
+				temp.append(suffix);
+			}
+			return temp.substring(0, temp.length() - 1);
+		}
+		return temp.toString();
 	}
 	protected abstract void send(Terminal terminal, BusMessage message) throws RuntimeException;
 }

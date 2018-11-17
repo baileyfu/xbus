@@ -1,4 +1,4 @@
-package xbus.stream.terminal;
+package com.lz.components.bus.stream.terminal;
 
 /**
  * 
@@ -9,7 +9,7 @@ package xbus.stream.terminal;
 public class TerminalNode{
 	private String terminalName;
 	private String ip;
-	private String port;
+	private int port;
 
 	public TerminalNode(String terminalName) {
 		this.terminalName = terminalName;
@@ -27,11 +27,11 @@ public class TerminalNode{
 		this.ip = ip;
 	}
 
-	public String getPort() {
+	public int getPort() {
 		return port;
 	}
 
-	public void setPort(String port) {
+	public void setPort(int port) {
 		this.port = port;
 	}
 

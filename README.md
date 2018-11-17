@@ -1,4 +1,4 @@
-# 消息总线 V1.0.3
+# 消息总线 V1.2.0
 基于Spring对异步消息进行抽象，将对生产者/消费者的操作抽象为对终端的操作；相关概念如下：<br/>
 Terminal：某个服务或应用<br/>
 TerminalNode：服务或应用的某个具体节点；一般指当前节点<br/>
@@ -6,7 +6,12 @@ Endpoint：某服务或应用中的一个服务端点；类似SpringMVC的Contro
 BusMessage：消息；包含消息类型、消息内容类型、endpoint的value、消息载体、指定是否需要消息回执以及对回执的处理<br/>
 BusPayload：消息载体<br/>
 
-默认Terminal的注册管理是ZooKeeper，MQ是RabbitMQ；当某节点永久下线时需要手动删除ZooKeeper和RabbitMQ中对应的节点信息<br/>
+当前实现的Terminal注册管理：<br/>
+1.ZooKeeper；当某节点永久下线时需要手动删除ZooKeeper中对应的节点信息<br/>
+2.配置文件<br/>
+当前实现的Broker：<br/>
+1.RabbitMQ；当某节点永久下线时需要手动删除RabbitMQ中对应的队列信息<br/>
+2.RocketMQ
 ##### Notice：若消息需要回执而消费端处理消息后未返回回执或返回Null，则消费端会抛出异常；但并不影响系统运行
 
 ###版本变更记录
@@ -40,6 +45,20 @@ BusPayload：消息载体<br/>
 			2.BusManager不再负责资源释放,改由AbstractBusAccessor来负责<br/>
 			3.确定RabbitMQ使用发布确认模式而不是事务模式
 		</td>
+	</tr>
+	<tr align='center'>
+		<td>V1.1.0</td>
+		<td>2018-11-6</td>
+		<td align="left">1.重构终端监听器/消息代理器等<br/>
+		2.支持配置多总线<br/>
+		3.新增RocketMQ实现
+		</td>
+	</tr>
+	<tr align='center'>
+		<td>V1.2.0</td>
+		<td>2018-11-12</td>
+		<td align="left">1.新增总线标准配置<br/>
+		2.支持总线开关</td>
 	</tr>
 </table>
 
@@ -81,7 +100,7 @@ Spring配置：
 	busMessage.setReceiptConsumer((BusPayload)->{...});
 	busTemplate.post(busMessage);
 	//或者指定目标服务或应用(名字全局唯一)
-	//busTemplate.post("terminal",busMessage,PostMode.RANDOM);
+	//busTemplate.post("targetTerminal",busMessage,PostMode.RANDOM);
 	...
 	
 	Endpoint定义(path不可重复,否则会启动时会抛异常)：
