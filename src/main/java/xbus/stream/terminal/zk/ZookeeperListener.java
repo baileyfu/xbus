@@ -14,7 +14,7 @@ import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 
-import commons.log.holder.CommonLoggerHolder;
+import xbus.BusLoggerHolder;
 import xbus.stream.terminal.Terminal;
 import xbus.stream.terminal.TerminalNode;
 
@@ -25,7 +25,7 @@ import xbus.stream.terminal.TerminalNode;
  * @version 1.0
  * @date 2017-11-03 10:45
  */
-public final class ZookeeperListener implements CommonLoggerHolder{
+public final class ZookeeperListener implements BusLoggerHolder{
 	private static ZookeeperListener instance;
 
 	private String rootPath;

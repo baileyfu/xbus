@@ -13,9 +13,9 @@ import java.util.function.Function;
 
 import org.apache.http.util.Asserts;
 
-import commons.log.holder.CommonLoggerHolder;
 import commons.variable.ActionGenerator;
 import io.reactivex.BackpressureStrategy;
+import xbus.BusLoggerHolder;
 import xbus.core.config.BusConfigBean;
 import xbus.em.MessageType;
 import xbus.em.PostMode;
@@ -38,7 +38,7 @@ import xbus.stream.terminal.TerminalConfigurator;
  * @version 1.0
  * @date 2017-10-30 09:28
  */
-public final class BusManager implements CommonLoggerHolder {
+public final class BusManager implements BusLoggerHolder {
 	//总线名
 	private String name;
 	private StreamBroker streamBroker;

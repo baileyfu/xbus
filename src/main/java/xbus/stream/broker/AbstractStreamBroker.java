@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 import org.apache.http.util.Asserts;
 
-import commons.log.holder.CommonLoggerHolder;
+import xbus.BusLoggerHolder;
 import xbus.stream.message.BusMessage;
 import xbus.stream.terminal.Terminal;
 
@@ -15,7 +15,7 @@ import xbus.stream.terminal.Terminal;
  * @version 1.0
  * @date 2017-10-20 17:26
  */
-public abstract class AbstractStreamBroker implements CommonLoggerHolder, StreamBroker {
+public abstract class AbstractStreamBroker implements BusLoggerHolder, StreamBroker {
 	protected static final String NAME_PREFIX="BUS_";
 	//consumer
 	protected boolean consumeRetryAble;

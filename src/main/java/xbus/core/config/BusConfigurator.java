@@ -15,7 +15,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import commons.log.holder.CommonLoggerHolder;
+import xbus.BusLoggerHolder;
 import xbus.stream.broker.BrokerConfigBean;
 import xbus.stream.broker.rabbit.RabbitConfigBean;
 import xbus.stream.broker.rocket.RocketConfigBean;
@@ -32,7 +32,7 @@ import xbus.stream.terminal.zk.ZKConfigBean;
  * @date 2018年11月12日
  * @version 1.0.0
  */
-public class BusConfigurator extends YamlPropertiesFactoryBean implements EnvironmentAware,CommonLoggerHolder{
+public class BusConfigurator extends YamlPropertiesFactoryBean implements EnvironmentAware,BusLoggerHolder{
 	private String xbusPrefix;
 	protected Map<String,BusConfigBean> busConfigs;
 	protected Map<String,BrokerConfigBean> brokerConfigs;
