@@ -14,8 +14,10 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 
+import xbus.em.HeaderParams;
 import xbus.stream.broker.AutoConsumeStreamBroker;
-import xbus.stream.terminal.Terminal;
+import xbus.stream.message.BusMessage;
+import xbus.stream.message.MessageCoverter;
 import xbus.stream.terminal.TerminalNode;
 
 /**
@@ -29,7 +31,7 @@ import xbus.stream.terminal.TerminalNode;
  * @date 2018年10月25日
  * @version 1.0.0
  */
-public abstract class StreamBrokerInitializer extends AutoConsumeStreamBroker {
+public abstract class StreamBrokerInitializer extends AutoConsumeStreamBroker implements MessageCoverter{
 	protected static final String TOPIC_CLUSTERING = "_CLUSTERING";
 	protected static final String TOPIC_BROADCASTING = "_BROADCASTING";
 	
@@ -45,19 +47,16 @@ public abstract class StreamBrokerInitializer extends AutoConsumeStreamBroker {
 	}
 
 	/**
-	 * 根据terminal类型决定发送到那个topic
-	 * 
-	 * @param terminal
-	 * @param path
+	 * RocketMQ消息转Bus消息
+	 * @param messageExt
 	 * @return
 	 */
-	protected String resolveTopicName(final Terminal terminal) {
-		// 发送到所有节点
-		if (terminal.getClass() == Terminal.class) {
-			return terminal.getName() + TOPIC_BROADCASTING;
-		} else {
-			return terminal.getName() + TOPIC_CLUSTERING;
-		}
+	protected BusMessage makeMessage(MessageExt messageExt){
+		String path = messageExt.getUserProperty(HeaderParams.XBUS_PATH.name());
+		String sourceTerminal = messageExt.getUserProperty(HeaderParams.XBUS_SOURCE_TERMINAL.name());
+		String messageType =messageExt.getUserProperty(HeaderParams.XBUS_MESSAGE_TYPE.name());
+		String messageContentType =messageExt.getUserProperty(HeaderParams.XBUS_MESSAGE_CONTENT_TYPE.name());
+		return coverter(path, sourceTerminal, messageType, messageContentType, messageExt.getBody());
 	}
 	
 	/**
@@ -103,15 +102,6 @@ public abstract class StreamBrokerInitializer extends AutoConsumeStreamBroker {
 		((DefaultMQPushConsumer) queueConsumer).setConsumeMessageBatchMaxSize(rocketConfig.getConsumeBatchSize());
 		((DefaultMQPushConsumer) queueConsumer).registerMessageListener(messageListener);
 	}
-
-	/**
-	 * 消费消息并返回结果
-	 * 
-	 * @param msgs
-	 * @param context
-	 * @return
-	 */
-	abstract protected ConsumeConcurrentlyStatus doConsume(List<MessageExt> msgs, ConsumeConcurrentlyContext context);
 	@Override
 	public void destoryChannel() throws Exception {
 		if (producer != null) {
@@ -122,4 +112,13 @@ public abstract class StreamBrokerInitializer extends AutoConsumeStreamBroker {
 			}
 		}
 	}
+	
+	/**
+	 * 消费消息并返回结果
+	 * 
+	 * @param msgs
+	 * @param context
+	 * @return
+	 */
+	abstract protected ConsumeConcurrentlyStatus doConsume(List<MessageExt> msgs, ConsumeConcurrentlyContext context);
 }
