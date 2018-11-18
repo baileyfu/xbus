@@ -1,6 +1,6 @@
-package com.lz.components.bus.stream.terminal.zk;
+package xbus.stream.terminal.zk;
 
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
+import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 默认配置器;需手动删除永久不再上线的节点

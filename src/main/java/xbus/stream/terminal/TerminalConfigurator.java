@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.terminal;
+package xbus.stream.terminal;
 
 import java.util.HashMap;
 import java.util.Map;

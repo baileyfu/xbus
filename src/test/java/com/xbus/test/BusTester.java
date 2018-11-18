@@ -1,4 +1,4 @@
-package com.lz.components.bus;
+package com.xbus.test;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,13 +7,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.alibaba.fastjson.JSONObject;
-import com.lz.components.bus.annotation.BusEndpoint;
-import com.lz.components.bus.annotation.BusRoot;
-import com.lz.components.bus.core.config.BusConfigurator;
-import com.lz.components.bus.em.MessageContentType;
-import com.lz.components.bus.em.PostMode;
-import com.lz.components.bus.stream.message.OriginalBusMessage;
-import com.lz.components.bus.stream.message.payload.JSONBusPayload;
+
+import xbus.AsyncBusTemplate;
+import xbus.annotation.BusEndpoint;
+import xbus.annotation.BusRoot;
+import xbus.core.config.BusConfigurator;
+import xbus.em.MessageContentType;
+import xbus.em.PostMode;
+import xbus.stream.message.OriginalBusMessage;
+import xbus.stream.message.payload.JSONBusPayload;
 
 
 /**

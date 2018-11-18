@@ -1,6 +1,6 @@
-package com.lz.components.bus.stream.message.payload;
+package xbus.stream.message.payload;
 
-import com.lz.components.bus.em.MessageContentType;
+import xbus.em.MessageContentType;
 
 /**
  * 

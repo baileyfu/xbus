@@ -1,4 +1,4 @@
-package com.lz.components.bus.core.config;
+package xbus.core.config;
 
 /**
  * 总线配置

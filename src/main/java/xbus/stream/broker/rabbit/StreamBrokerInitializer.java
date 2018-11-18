@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.broker.rabbit;
+package xbus.stream.broker.rabbit;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -11,12 +11,13 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate.ReturnCallback;
 import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.amqp.rabbit.support.PublisherCallbackChannel;
 
-import com.lz.components.bus.stream.broker.BrokerConfigBean;
-import com.lz.components.bus.stream.broker.ManualConsumeStreamBroker;
-import com.lz.components.bus.stream.terminal.TerminalNode;
-import com.lz.components.common.beanutil.BeanUtils;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
+
+import commons.beanutils.BeanUtils;
+import xbus.stream.broker.BrokerConfigBean;
+import xbus.stream.broker.ManualConsumeStreamBroker;
+import xbus.stream.terminal.TerminalNode;
 
 public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker{
 	protected RabbitTemplate rabbitTemplate;
@@ -102,6 +103,5 @@ public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker{
 
 	@Override
 	public void destoryChannel() throws Exception {
-		rabbitTemplate.stop();
 	}
 }

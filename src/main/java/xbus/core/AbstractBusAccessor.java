@@ -1,4 +1,4 @@
-package com.lz.components.bus.core;
+package xbus.core;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -7,10 +7,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.ContextClosedEvent;
 
-import com.lz.components.bus.core.config.BusConfigBean;
-import com.lz.components.bus.stream.broker.StreamBroker;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
-import com.lz.components.common.log.holder.CommonLoggerHolder;
+import commons.log.holder.CommonLoggerHolder;
+import xbus.core.config.BusConfigBean;
+import xbus.stream.broker.StreamBroker;
+import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 总线访问器<br/>

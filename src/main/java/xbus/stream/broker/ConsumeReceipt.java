@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.broker;
+package xbus.stream.broker;
 
 /**
  * 消费回执<br/>

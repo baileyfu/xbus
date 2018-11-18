@@ -1,8 +1,8 @@
-package com.lz.components.bus.stream.terminal.file;
+package xbus.stream.terminal.file;
 
 import java.util.List;
 
-import com.lz.components.bus.stream.terminal.TerminalConfigBean;
+import xbus.stream.terminal.TerminalConfigBean;
 
 public class FileConfigBean extends TerminalConfigBean{
 	private List<ServerInfo> servers;

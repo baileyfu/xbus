@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.broker.rocket;
+package xbus.stream.broker.rocket;
 
 import java.util.List;
 import java.util.function.Function;
@@ -14,12 +14,12 @@ import org.apache.rocketmq.common.MixAll;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
 
-import com.lz.components.bus.em.HeaderParams;
-import com.lz.components.bus.stream.broker.ConsumeReceipt;
-import com.lz.components.bus.stream.message.BusMessage;
-import com.lz.components.bus.stream.message.MessageCoverter;
-import com.lz.components.bus.stream.terminal.Terminal;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
+import xbus.em.HeaderParams;
+import xbus.stream.broker.ConsumeReceipt;
+import xbus.stream.message.BusMessage;
+import xbus.stream.message.MessageCoverter;
+import xbus.stream.terminal.Terminal;
+import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * Rocket消息代理器

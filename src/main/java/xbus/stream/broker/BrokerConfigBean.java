@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.broker;
+package xbus.stream.broker;
 
 public class BrokerConfigBean {
 	public static final Boolean DEFAULT_CONSUME_RETRYABLE = true;

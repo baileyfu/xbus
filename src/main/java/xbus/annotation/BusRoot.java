@@ -1,4 +1,4 @@
-package com.lz.components.bus.annotation;
+package xbus.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

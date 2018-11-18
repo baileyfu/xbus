@@ -1,4 +1,4 @@
-package com.lz.components.bus.core;
+package xbus.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,23 +13,22 @@ import java.util.function.Function;
 
 import org.apache.http.util.Asserts;
 
-import com.lz.components.bus.core.config.BusConfigBean;
-import com.lz.components.bus.em.MessageType;
-import com.lz.components.bus.em.PostMode;
-import com.lz.components.bus.stream.broker.AutoConsumeStreamBroker;
-import com.lz.components.bus.stream.broker.ConsumeReceipt;
-import com.lz.components.bus.stream.broker.ManualConsumeStreamBroker;
-import com.lz.components.bus.stream.broker.StreamBroker;
-import com.lz.components.bus.stream.message.BusMessage;
-import com.lz.components.bus.stream.message.OriginalBusMessage;
-import com.lz.components.bus.stream.message.ReceiptBusMessage;
-import com.lz.components.bus.stream.message.payload.BusPayload;
-import com.lz.components.bus.stream.terminal.Terminal;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
-import com.lz.components.common.log.holder.CommonLoggerHolder;
-import com.lz.components.common.util.variable.ActionGenerator;
-
+import commons.log.holder.CommonLoggerHolder;
+import commons.variable.ActionGenerator;
 import io.reactivex.BackpressureStrategy;
+import xbus.core.config.BusConfigBean;
+import xbus.em.MessageType;
+import xbus.em.PostMode;
+import xbus.stream.broker.AutoConsumeStreamBroker;
+import xbus.stream.broker.ConsumeReceipt;
+import xbus.stream.broker.ManualConsumeStreamBroker;
+import xbus.stream.broker.StreamBroker;
+import xbus.stream.message.BusMessage;
+import xbus.stream.message.OriginalBusMessage;
+import xbus.stream.message.ReceiptBusMessage;
+import xbus.stream.message.payload.BusPayload;
+import xbus.stream.terminal.Terminal;
+import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 总线管理器<br/>

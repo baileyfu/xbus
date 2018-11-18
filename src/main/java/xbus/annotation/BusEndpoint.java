@@ -1,12 +1,12 @@
-package com.lz.components.bus.annotation;
+package xbus.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.lz.components.bus.core.BusManagerFactory;
-import com.lz.components.bus.em.MessageContentType;
+import xbus.core.BusManagerFactory;
+import xbus.em.MessageContentType;
 
 /**
  * 总线子路径

@@ -1,6 +1,6 @@
-package com.lz.components.bus.stream.broker.rocket;
+package xbus.stream.broker.rocket;
 
-import com.lz.components.bus.stream.broker.BrokerConfigBean;
+import xbus.stream.broker.BrokerConfigBean;
 
 /**
  * RocketMQ相关配置

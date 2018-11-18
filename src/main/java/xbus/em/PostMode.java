@@ -1,8 +1,8 @@
-package com.lz.components.bus.em;
+package xbus.em;
 
-import com.lz.components.bus.stream.terminal.RandomTerminal;
-import com.lz.components.bus.stream.terminal.RoundrobinTerminal;
-import com.lz.components.bus.stream.terminal.Terminal;
+import xbus.stream.terminal.RandomTerminal;
+import xbus.stream.terminal.RoundrobinTerminal;
+import xbus.stream.terminal.Terminal;
 
 /**
  * 终端发送模式

@@ -1,4 +1,4 @@
-package com.lz.components.bus.core.config;
+package xbus.core.config;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -11,18 +11,18 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.stereotype.Component;
 
-import com.lz.components.bus.AsyncBusTemplate;
-import com.lz.components.bus.BusTemplate;
-import com.lz.components.bus.stream.broker.BrokerConfigBean;
-import com.lz.components.bus.stream.broker.rabbit.RabbitConfigBean;
-import com.lz.components.bus.stream.broker.rabbit.RabbitMQStreamBroker;
-import com.lz.components.bus.stream.broker.rocket.RocketConfigBean;
-import com.lz.components.bus.stream.broker.rocket.RocketMQStreamBroker;
-import com.lz.components.bus.stream.terminal.TerminalConfigBean;
-import com.lz.components.bus.stream.terminal.file.FileConfigBean;
-import com.lz.components.bus.stream.terminal.file.FileConfigurator;
-import com.lz.components.bus.stream.terminal.zk.ZKConfigBean;
-import com.lz.components.bus.stream.terminal.zk.ZKConfigurator;
+import xbus.AsyncBusTemplate;
+import xbus.BusTemplate;
+import xbus.stream.broker.BrokerConfigBean;
+import xbus.stream.broker.rabbit.RabbitConfigBean;
+import xbus.stream.broker.rabbit.RabbitMQStreamBroker;
+import xbus.stream.broker.rocket.RocketConfigBean;
+import xbus.stream.broker.rocket.RocketMQStreamBroker;
+import xbus.stream.terminal.TerminalConfigBean;
+import xbus.stream.terminal.file.FileConfigBean;
+import xbus.stream.terminal.file.FileConfigurator;
+import xbus.stream.terminal.zk.ZKConfigBean;
+import xbus.stream.terminal.zk.ZKConfigurator;
 /**
  * 
  * @author fuli

@@ -1,9 +1,9 @@
-package com.lz.components.bus.core;
+package xbus.core;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lz.components.common.log.holder.CommonLoggerHolder;
+import xbus.BusLoggerHolder;
 
 /**
  * 系统关闭时需关闭某些资源
@@ -12,7 +12,7 @@ import com.lz.components.common.log.holder.CommonLoggerHolder;
  * @version 1.0
  * @date 2017-11-01 17:45
  */
-public abstract class ShutdownAware implements CommonLoggerHolder {
+public abstract class ShutdownAware implements BusLoggerHolder {
 	private static final List<ShutdownAware> NEED_POST_HANDLE = new ArrayList<>();
 	static{
 		Runtime.getRuntime().addShutdownHook(new Thread() {

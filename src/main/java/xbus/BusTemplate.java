@@ -1,13 +1,13 @@
-package com.lz.components.bus;
+package xbus;
 
-import com.lz.components.bus.code.BusExceptionCode;
-import com.lz.components.bus.core.AbstractBusAccessor;
-import com.lz.components.bus.core.config.BusConfigBean;
-import com.lz.components.bus.em.PostMode;
-import com.lz.components.bus.exception.BusException;
-import com.lz.components.bus.stream.broker.StreamBroker;
-import com.lz.components.bus.stream.message.BusMessage;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
+import xbus.core.AbstractBusAccessor;
+import xbus.core.config.BusConfigBean;
+import xbus.em.PostMode;
+import xbus.exception.BusException;
+import xbus.exception.BusPostException;
+import xbus.stream.broker.StreamBroker;
+import xbus.stream.message.BusMessage;
+import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 同步发送消息操作模板
@@ -34,7 +34,7 @@ public class BusTemplate extends AbstractBusAccessor {
 			try {
 				busManager.post(message, PostMode.ROUNDROBIN, terminalNames);
 			} catch (Exception e) {
-				throw new BusException(BusExceptionCode.BUS_POST_FAILED, e);
+				throw new BusPostException(e);
 			}
 		}
 	}
@@ -50,7 +50,7 @@ public class BusTemplate extends AbstractBusAccessor {
 			try{
 				busManager.post(message, postMode,terminalNames);
 			} catch (Exception e) {
-				throw new BusException(BusExceptionCode.BUS_POST_FAILED,e);
+				throw new BusPostException(e);
 			}
 		}
 	}

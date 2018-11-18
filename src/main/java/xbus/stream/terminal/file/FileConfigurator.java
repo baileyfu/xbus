@@ -1,14 +1,14 @@
-package com.lz.components.bus.stream.terminal.file;
+package xbus.stream.terminal.file;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.lz.components.bus.stream.terminal.Terminal;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
-import com.lz.components.bus.stream.terminal.TerminalNode;
-import com.lz.components.bus.stream.terminal.file.FileConfigBean.NodeAddress;
-import com.lz.components.bus.stream.terminal.file.FileConfigBean.ServerInfo;
+import xbus.stream.terminal.Terminal;
+import xbus.stream.terminal.TerminalConfigurator;
+import xbus.stream.terminal.TerminalNode;
+import xbus.stream.terminal.file.FileConfigBean.NodeAddress;
+import xbus.stream.terminal.file.FileConfigBean.ServerInfo;
 
 /**
  * 基于配置文件的terminal配置器

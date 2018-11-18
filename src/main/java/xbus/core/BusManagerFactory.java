@@ -1,10 +1,10 @@
-package com.lz.components.bus.core;
+package xbus.core;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.lz.components.bus.stream.broker.StreamBroker;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
+import xbus.stream.broker.StreamBroker;
+import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 总线管理器创建工厂

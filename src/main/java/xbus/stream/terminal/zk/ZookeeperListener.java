@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.terminal.zk;
+package xbus.stream.terminal.zk;
 
 import java.util.HashSet;
 import java.util.List;
@@ -14,9 +14,9 @@ import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 
-import com.lz.components.bus.stream.terminal.Terminal;
-import com.lz.components.bus.stream.terminal.TerminalNode;
-import com.lz.components.common.log.holder.CommonLoggerHolder;
+import commons.log.holder.CommonLoggerHolder;
+import xbus.stream.terminal.Terminal;
+import xbus.stream.terminal.TerminalNode;
 
 /**
  * 监听ZooKeeper变动;单例实现;系统关闭时需调用stop释放资源

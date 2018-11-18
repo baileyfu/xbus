@@ -1,10 +1,10 @@
-package com.lz.components.bus.stream.broker.rocket;
+package xbus.stream.broker.rocket;
 
 import java.util.Set;
 
-import com.lz.components.bus.stream.message.BusMessage;
-import com.lz.components.bus.stream.terminal.Terminal;
-import com.lz.components.bus.stream.terminal.TerminalNode;
+import xbus.stream.message.BusMessage;
+import xbus.stream.terminal.Terminal;
+import xbus.stream.terminal.TerminalNode;
 
 /**
  * Rocket多路径消息代理器<br/>

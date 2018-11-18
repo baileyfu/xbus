@@ -1,4 +1,4 @@
-package com.lz.components.bus.em;
+package xbus.em;
 
 /**
  * 消息头信息参数定义

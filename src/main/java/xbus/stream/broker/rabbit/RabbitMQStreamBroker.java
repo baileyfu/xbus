@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.broker.rabbit;
+package xbus.stream.broker.rabbit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,18 +18,19 @@ import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.amqp.rabbit.support.DefaultMessagePropertiesConverter;
 import org.springframework.amqp.rabbit.support.MessagePropertiesConverter;
 
-import com.lz.components.bus.em.HeaderParams;
-import com.lz.components.bus.em.MessageType;
-import com.lz.components.bus.stream.broker.BrokerConfigBean;
-import com.lz.components.bus.stream.broker.ConsumeReceipt;
-import com.lz.components.bus.stream.message.BusMessage;
-import com.lz.components.bus.stream.message.MessageCoverter;
-import com.lz.components.bus.stream.message.OriginalBusMessage;
-import com.lz.components.bus.stream.terminal.Terminal;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
-import com.lz.components.bus.stream.terminal.TerminalNode;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
+
+import xbus.em.HeaderParams;
+import xbus.em.MessageType;
+import xbus.stream.broker.BrokerConfigBean;
+import xbus.stream.broker.ConsumeReceipt;
+import xbus.stream.message.BusMessage;
+import xbus.stream.message.MessageCoverter;
+import xbus.stream.message.OriginalBusMessage;
+import xbus.stream.terminal.Terminal;
+import xbus.stream.terminal.TerminalConfigurator;
+import xbus.stream.terminal.TerminalNode;
 
 /**
  * Rabbit消息处理器

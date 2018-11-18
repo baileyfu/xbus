@@ -1,6 +1,6 @@
-package com.lz.components.bus.stream.terminal.zk;
+package xbus.stream.terminal.zk;
 
-import com.lz.components.bus.stream.terminal.TerminalConfigBean;
+import xbus.stream.terminal.TerminalConfigBean;
 
 public class ZKConfigBean extends TerminalConfigBean{
 	private String rootPath;

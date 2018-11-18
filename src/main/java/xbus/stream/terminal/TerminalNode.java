@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.terminal;
+package xbus.stream.terminal;
 
 /**
  * 

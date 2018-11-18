@@ -1,7 +1,5 @@
-package com.lz.components.bus.exception;
+package xbus.exception;
 
-import com.lz.components.bus.code.BusExceptionCode;
-import com.lz.components.common.exception.LzRuntimeException;
 
 /**
  * 总线异常
@@ -10,22 +8,14 @@ import com.lz.components.common.exception.LzRuntimeException;
  * @date 2018年10月29日
  * @version 1.0.0
  */
-public class BusException extends LzRuntimeException {
-	private static final long serialVersionUID = -945269075458496051L;
-
+public class BusException extends RuntimeException {
+	private static final long serialVersionUID = 8781357941561853515L;
+	private static final String MESSAGE="BUS_FAILED(总线异常)";
 	public BusException() {
-		super(BusExceptionCode.BUS_FAILED);
+		super(MESSAGE);
 	}
 
 	public BusException(Throwable cause) {
-		super(BusExceptionCode.BUS_FAILED, cause);
-	}
-
-	public BusException(BusExceptionCode BusExceptionCode) {
-		super(BusExceptionCode);
-	}
-
-	public BusException(BusExceptionCode BusExceptionCode, Throwable cause) {
-		super(BusExceptionCode, cause);
+		super(MESSAGE, cause);
 	}
 }

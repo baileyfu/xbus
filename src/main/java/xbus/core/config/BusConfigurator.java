@@ -1,9 +1,10 @@
-package com.lz.components.bus.core.config;
+package xbus.core.config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,16 +15,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import com.google.common.base.Optional;
-import com.lz.components.bus.stream.broker.BrokerConfigBean;
-import com.lz.components.bus.stream.broker.rabbit.RabbitConfigBean;
-import com.lz.components.bus.stream.broker.rocket.RocketConfigBean;
-import com.lz.components.bus.stream.terminal.TerminalConfigBean;
-import com.lz.components.bus.stream.terminal.file.FileConfigBean;
-import com.lz.components.bus.stream.terminal.file.FileConfigBean.NodeAddress;
-import com.lz.components.bus.stream.terminal.file.FileConfigBean.ServerInfo;
-import com.lz.components.bus.stream.terminal.zk.ZKConfigBean;
-import com.lz.components.common.log.holder.CommonLoggerHolder;
+import commons.log.holder.CommonLoggerHolder;
+import xbus.stream.broker.BrokerConfigBean;
+import xbus.stream.broker.rabbit.RabbitConfigBean;
+import xbus.stream.broker.rocket.RocketConfigBean;
+import xbus.stream.terminal.TerminalConfigBean;
+import xbus.stream.terminal.file.FileConfigBean;
+import xbus.stream.terminal.file.FileConfigBean.NodeAddress;
+import xbus.stream.terminal.file.FileConfigBean.ServerInfo;
+import xbus.stream.terminal.zk.ZKConfigBean;
 
 /**
  * 总线装配
@@ -45,47 +45,47 @@ public class BusConfigurator extends YamlPropertiesFactoryBean implements Enviro
 		busConfigs = new HashMap<>();
 	}
 	private void parseProps(Properties properties){
-		xbusPrefix = Optional.fromNullable(environment.getProperty("xbusPrefix")).or(xbusPrefix);
+		xbusPrefix = Optional.ofNullable(environment.getProperty("xbusPrefix")).orElse(xbusPrefix);
 		//总开关
-		Boolean enable=Boolean.valueOf(Optional.fromNullable(properties.get(xbusPrefix+".enable")).or(BusConfigBean.DEFAULT_ENABLE).toString());
+		Boolean enable=Boolean.valueOf(Optional.ofNullable(properties.get(xbusPrefix+".enable")).orElse(BusConfigBean.DEFAULT_ENABLE).toString());
 		for(Object key:properties.keySet()){
 			String propName = key.toString();
 			if (propName.startsWith(xbusPrefix)) {
 				String busName = StringUtils.substringBefore(propName.substring(15), ".");
 				String prefixName = xbusPrefix +"."+ busName;
 				BusConfigBean busConfig=new BusConfigBean();
-				busConfig.setAccessInterval(Long.valueOf(Optional.fromNullable(properties.get(prefixName+".accessInterval")).or(BusConfigBean.DEFAULT_ACCESS_INTERVAL).toString()));
-				busConfig.setEnable(Boolean.valueOf(Optional.fromNullable(properties.get(prefixName+".enable")).or(enable).toString()));
-				busConfig.setAsyncAble(Boolean.valueOf(Optional.fromNullable(properties.get(prefixName+".asyncAble")).or(BusConfigBean.DEFAULT_ASYNCABLE).toString()));
+				busConfig.setAccessInterval(Long.valueOf(Optional.ofNullable(properties.get(prefixName+".accessInterval")).orElse(BusConfigBean.DEFAULT_ACCESS_INTERVAL).toString()));
+				busConfig.setEnable(Boolean.valueOf(Optional.ofNullable(properties.get(prefixName+".enable")).orElse(enable).toString()));
+				busConfig.setAsyncAble(Boolean.valueOf(Optional.ofNullable(properties.get(prefixName+".asyncAble")).orElse(BusConfigBean.DEFAULT_ASYNCABLE).toString()));
 				busConfigs.put(busName, busConfig);
 				/** broker */
 				if(propName.startsWith(prefixName + ".broker")){
 					if (brokerConfigs.get(busName) == null) {
 						if(propName.startsWith(prefixName + ".broker.rocket")){//rocket
 							RocketConfigBean rocketConfig = new RocketConfigBean();
-							rocketConfig.setDurable(Boolean.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.durable")).or(BrokerConfigBean.DEFAULT_DURABLE).toString()));
-							rocketConfig.setConsumeRetryAble(Boolean.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.consumeRetryAble")).or(BrokerConfigBean.DEFAULT_CONSUME_RETRYABLE).toString()));
-							rocketConfig.setConsumeRetryCount(Integer.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.consumeRetryCount")).or(BrokerConfigBean.DEFAULT_CONSUME_RETRY_COUNT).toString()));
-							rocketConfig.setConsumerTimeoutMillis(Long.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.consumerTimeoutMillis")).or(BrokerConfigBean.DEFAULT_CONSUME_TIMEOUT_MILLIS).toString()));
-							rocketConfig.setProduceRetryAble(Boolean.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.produceRetryAble")).or(BrokerConfigBean.DEFAULT_PRODUCE_RETRYABLE).toString()));
-							rocketConfig.setProduceRetryCount(Integer.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.produceRetryCount")).or(BrokerConfigBean.DEFAULT_PRODUCE_RETRY_COUNT).toString()));
-							rocketConfig.setProducerTimeoutMillis(Long.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.producerTimeoutMillis")).or(BrokerConfigBean.DEFAULT_PRODUCE_TIMEOUT_MILLIS).toString()));
-							rocketConfig.setNameSrvAddr(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.nameSrvAddr")).or(StringUtils.EMPTY).toString());
+							rocketConfig.setDurable(Boolean.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.durable")).orElse(BrokerConfigBean.DEFAULT_DURABLE).toString()));
+							rocketConfig.setConsumeRetryAble(Boolean.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.consumeRetryAble")).orElse(BrokerConfigBean.DEFAULT_CONSUME_RETRYABLE).toString()));
+							rocketConfig.setConsumeRetryCount(Integer.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.consumeRetryCount")).orElse(BrokerConfigBean.DEFAULT_CONSUME_RETRY_COUNT).toString()));
+							rocketConfig.setConsumerTimeoutMillis(Long.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.consumerTimeoutMillis")).orElse(BrokerConfigBean.DEFAULT_CONSUME_TIMEOUT_MILLIS).toString()));
+							rocketConfig.setProduceRetryAble(Boolean.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.produceRetryAble")).orElse(BrokerConfigBean.DEFAULT_PRODUCE_RETRYABLE).toString()));
+							rocketConfig.setProduceRetryCount(Integer.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.produceRetryCount")).orElse(BrokerConfigBean.DEFAULT_PRODUCE_RETRY_COUNT).toString()));
+							rocketConfig.setProducerTimeoutMillis(Long.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.producerTimeoutMillis")).orElse(BrokerConfigBean.DEFAULT_PRODUCE_TIMEOUT_MILLIS).toString()));
+							rocketConfig.setNameSrvAddr(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.nameSrvAddr")).orElse(StringUtils.EMPTY).toString());
 							Asserts.notEmpty(rocketConfig.getNameSrvAddr(), prefixName+".broker.rocket.nameSrvAddr");
-							rocketConfig.setTopicQueueNums(Integer.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.topicQueueNums")).or(RocketConfigBean.ROCKET_DEFAULT_TOPIC_QUEUE_NUMS).toString()));
-							rocketConfig.setPullBatchSize(Integer.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.pullBatchSize")).or(RocketConfigBean.ROCKET_DEFAULT_PULL_BATCH_SIZE).toString()));
-							rocketConfig.setConsumeBatchSize(Integer.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rocket.consumeBatchSize")).or(RocketConfigBean.ROCKET_DEFAULT_CONSUME_BATCH_SIZE).toString()));
+							rocketConfig.setTopicQueueNums(Integer.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.topicQueueNums")).orElse(RocketConfigBean.ROCKET_DEFAULT_TOPIC_QUEUE_NUMS).toString()));
+							rocketConfig.setPullBatchSize(Integer.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.pullBatchSize")).orElse(RocketConfigBean.ROCKET_DEFAULT_PULL_BATCH_SIZE).toString()));
+							rocketConfig.setConsumeBatchSize(Integer.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rocket.consumeBatchSize")).orElse(RocketConfigBean.ROCKET_DEFAULT_CONSUME_BATCH_SIZE).toString()));
 							brokerConfigs.put(busName, rocketConfig);
 						}else if(propName.startsWith(prefixName + ".broker.rabbit")){//rabbit
 							RabbitConfigBean rabbitConfig = new RabbitConfigBean();
-							rabbitConfig.setDurable(Boolean.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rabbit.durable")).or(BrokerConfigBean.DEFAULT_DURABLE).toString()));
-							rabbitConfig.setConsumeRetryAble(Boolean.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rabbit.consumeRetryAble")).or(BrokerConfigBean.DEFAULT_CONSUME_RETRYABLE).toString()));
-							rabbitConfig.setConsumeRetryCount(Integer.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rabbit.consumeRetryCount")).or(BrokerConfigBean.DEFAULT_CONSUME_RETRY_COUNT).toString()));
-							rabbitConfig.setConsumerTimeoutMillis(Long.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rabbit.consumerTimeoutMillis")).or(BrokerConfigBean.DEFAULT_CONSUME_TIMEOUT_MILLIS).toString()));
-							rabbitConfig.setProduceRetryAble(Boolean.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rabbit.produceRetryAble")).or(BrokerConfigBean.DEFAULT_PRODUCE_RETRYABLE).toString()));
-							rabbitConfig.setProduceRetryCount(Integer.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rabbit.produceRetryCount")).or(BrokerConfigBean.DEFAULT_PRODUCE_RETRY_COUNT).toString()));
-							rabbitConfig.setProducerTimeoutMillis(Long.valueOf(Optional.fromNullable(properties.get(prefixName + ".broker.rabbit.producerTimeoutMillis")).or(BrokerConfigBean.DEFAULT_PRODUCE_TIMEOUT_MILLIS).toString()));
-							rabbitConfig.setRabbitTemplateName(Optional.fromNullable(properties.get(prefixName + ".broker.rabbit.rabbitTemplateName")).or(StringUtils.EMPTY).toString());
+							rabbitConfig.setDurable(Boolean.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rabbit.durable")).orElse(BrokerConfigBean.DEFAULT_DURABLE).toString()));
+							rabbitConfig.setConsumeRetryAble(Boolean.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rabbit.consumeRetryAble")).orElse(BrokerConfigBean.DEFAULT_CONSUME_RETRYABLE).toString()));
+							rabbitConfig.setConsumeRetryCount(Integer.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rabbit.consumeRetryCount")).orElse(BrokerConfigBean.DEFAULT_CONSUME_RETRY_COUNT).toString()));
+							rabbitConfig.setConsumerTimeoutMillis(Long.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rabbit.consumerTimeoutMillis")).orElse(BrokerConfigBean.DEFAULT_CONSUME_TIMEOUT_MILLIS).toString()));
+							rabbitConfig.setProduceRetryAble(Boolean.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rabbit.produceRetryAble")).orElse(BrokerConfigBean.DEFAULT_PRODUCE_RETRYABLE).toString()));
+							rabbitConfig.setProduceRetryCount(Integer.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rabbit.produceRetryCount")).orElse(BrokerConfigBean.DEFAULT_PRODUCE_RETRY_COUNT).toString()));
+							rabbitConfig.setProducerTimeoutMillis(Long.valueOf(Optional.ofNullable(properties.get(prefixName + ".broker.rabbit.producerTimeoutMillis")).orElse(BrokerConfigBean.DEFAULT_PRODUCE_TIMEOUT_MILLIS).toString()));
+							rabbitConfig.setRabbitTemplateName(Optional.ofNullable(properties.get(prefixName + ".broker.rabbit.rabbitTemplateName")).orElse(StringUtils.EMPTY).toString());
 							Asserts.notEmpty(rabbitConfig.getRabbitTemplateName(), prefixName + ".broker.rabbit.rabbitTemplateName");
 							brokerConfigs.put(busName, rabbitConfig);
 						}
@@ -95,10 +95,10 @@ public class BusConfigurator extends YamlPropertiesFactoryBean implements Enviro
 				/** terminal */
 				if(propName.startsWith(prefixName + ".terminal")){
 					if (terminalConfigs.get(busName) == null) {
-						String serverName = Optional.fromNullable(properties.get(prefixName + ".terminal.serverName")).or(StringUtils.EMPTY).toString();
+						String serverName = Optional.ofNullable(properties.get(prefixName + ".terminal.serverName")).orElse(StringUtils.EMPTY).toString();
 						Asserts.notEmpty(serverName, prefixName + ".terminal.serverName");
-						String ip = Optional.fromNullable(properties.get(prefixName + ".terminal.ip")).or(StringUtils.EMPTY).toString();
-						int port=Integer.valueOf(Optional.fromNullable(properties.get(prefixName + ".terminal.port")).or("0").toString());
+						String ip = Optional.ofNullable(properties.get(prefixName + ".terminal.ip")).orElse(StringUtils.EMPTY).toString();
+						int port=Integer.valueOf(Optional.ofNullable(properties.get(prefixName + ".terminal.port")).orElse("0").toString());
 						if(propName.startsWith(prefixName + ".terminal.file")){//file
 							FileConfigBean fileConfig = new FileConfigBean();
 							fileConfig.setServerName(serverName);
@@ -141,9 +141,9 @@ public class BusConfigurator extends YamlPropertiesFactoryBean implements Enviro
 							zkConfig.setServerName(serverName);
 							zkConfig.setIp(ip);
 							zkConfig.setPort(port);
-							zkConfig.setRootPath(Optional.fromNullable(properties.get(prefixName + ".terminal.zk.rootPath")).or(StringUtils.EMPTY).toString());
+							zkConfig.setRootPath(Optional.ofNullable(properties.get(prefixName + ".terminal.zk.rootPath")).orElse(StringUtils.EMPTY).toString());
 							Asserts.notEmpty(zkConfig.getRootPath(), prefixName+".terminal.zk.rootPath");
-							zkConfig.setServers(Optional.fromNullable(properties.get(prefixName + ".terminal.zk.servers")).or(StringUtils.EMPTY).toString());
+							zkConfig.setServers(Optional.ofNullable(properties.get(prefixName + ".terminal.zk.servers")).orElse(StringUtils.EMPTY).toString());
 							Asserts.notEmpty(zkConfig.getServers(), prefixName+".terminal.zk.servers");
 							terminalConfigs.put(busName, zkConfig);
 						}

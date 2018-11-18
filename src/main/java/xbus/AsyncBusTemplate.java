@@ -1,13 +1,13 @@
-package com.lz.components.bus;
+package xbus;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import com.lz.components.bus.core.config.BusConfigBean;
-import com.lz.components.bus.em.PostMode;
-import com.lz.components.bus.stream.broker.StreamBroker;
-import com.lz.components.bus.stream.message.BusMessage;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
+import xbus.core.config.BusConfigBean;
+import xbus.em.PostMode;
+import xbus.stream.broker.StreamBroker;
+import xbus.stream.message.BusMessage;
+import xbus.stream.terminal.TerminalConfigurator;
 
 /**
  * 异步发送消息操作模板

@@ -1,15 +1,15 @@
-package com.lz.components.bus.stream.message;
+package xbus.stream.message;
 
 import org.apache.http.util.Asserts;
 
-import com.lz.components.bus.em.MessageContentType;
-import com.lz.components.bus.em.MessageType;
-import com.lz.components.bus.stream.message.payload.BusPayload;
-import com.lz.components.bus.stream.message.payload.BytesBusPayload;
-import com.lz.components.bus.stream.message.payload.JSONBusPayload;
-import com.lz.components.bus.stream.message.payload.SerializedObjectBusPayload;
-import com.lz.components.bus.stream.message.payload.TextBusPayload;
-import com.lz.components.bus.stream.message.payload.XMLBusPayload;
+import xbus.em.MessageContentType;
+import xbus.em.MessageType;
+import xbus.stream.message.payload.BusPayload;
+import xbus.stream.message.payload.BytesBusPayload;
+import xbus.stream.message.payload.JSONBusPayload;
+import xbus.stream.message.payload.SerializedObjectBusPayload;
+import xbus.stream.message.payload.TextBusPayload;
+import xbus.stream.message.payload.XMLBusPayload;
 
 /**
  * 原消息转换为BusMessage

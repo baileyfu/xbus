@@ -1,10 +1,11 @@
-package com.lz.components.bus.stream.message.payload;
+package xbus.stream.message.payload;
 
 import org.apache.http.util.Asserts;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.lz.components.bus.em.MessageContentType;
+
+import xbus.em.MessageContentType;
 
 /**
  * 基于fastjson的实现

@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.message;
+package xbus.stream.message;
 
 /**
  * 消息ID生成器

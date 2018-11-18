@@ -1,9 +1,9 @@
-package com.lz.components.bus.stream.broker;
+package xbus.stream.broker;
 
 import java.util.List;
 import java.util.function.Function;
 
-import com.lz.components.bus.stream.message.BusMessage;
+import xbus.stream.message.BusMessage;
 
 /**
  * 由Broker负责消费

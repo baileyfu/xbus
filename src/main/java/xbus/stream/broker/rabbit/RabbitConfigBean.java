@@ -1,6 +1,6 @@
-package com.lz.components.bus.stream.broker.rabbit;
+package xbus.stream.broker.rabbit;
 
-import com.lz.components.bus.stream.broker.BrokerConfigBean;
+import xbus.stream.broker.BrokerConfigBean;
 
 /**
  * RabbitMQ相关配置

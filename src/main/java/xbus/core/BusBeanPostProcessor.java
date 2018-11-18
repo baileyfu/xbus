@@ -1,4 +1,4 @@
-package com.lz.components.bus.core;
+package xbus.core;
 
 import java.lang.reflect.Method;
 
@@ -7,11 +7,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
-import com.lz.components.bus.annotation.BusEndpoint;
-import com.lz.components.bus.annotation.BusRoot;
-import com.lz.components.bus.code.BusExceptionCode;
-import com.lz.components.bus.exception.BusException;
-import com.lz.components.bus.stream.message.payload.BusPayload;
+import xbus.annotation.BusEndpoint;
+import xbus.annotation.BusRoot;
+import xbus.exception.BusException;
+import xbus.exception.BusReceiveException;
+import xbus.stream.message.payload.BusPayload;
 
 /**
  * 解析bus的注解
@@ -63,13 +63,13 @@ public class BusBeanPostProcessor implements BeanPostProcessor {
 									throw new IllegalArgumentException("bus endpointHandler of path " + endpointPath + " needs "+busEndpoint.contentType()+",but received "+busPayload.getContentType());
 								return (BusPayload) method.invoke(bean, sourceTerminal, busPayload);
 							} catch (Exception e) {
-								throw new BusException(BusExceptionCode.BUS_RECEIVE_FAILED, e);
+								throw new BusReceiveException(e);
 							}
 						});
 					}
 				}
 			} catch (Exception e) {
-				throw new BusException(BusExceptionCode.BUS_FAILED, e);
+				throw new BusException(e);
 			}
 		}
 		return bean;

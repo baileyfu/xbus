@@ -1,4 +1,4 @@
-package com.lz.components.bus.stream.broker.rocket;
+package xbus.stream.broker.rocket;
 
 import java.util.List;
 import java.util.Set;
@@ -14,9 +14,9 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 
-import com.lz.components.bus.stream.broker.AutoConsumeStreamBroker;
-import com.lz.components.bus.stream.terminal.Terminal;
-import com.lz.components.bus.stream.terminal.TerminalNode;
+import xbus.stream.broker.AutoConsumeStreamBroker;
+import xbus.stream.terminal.Terminal;
+import xbus.stream.terminal.TerminalNode;
 
 /**
  * 代理器初始化<br/>

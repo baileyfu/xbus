@@ -1,11 +1,11 @@
-package com.lz.components.bus.stream.broker;
+package xbus.stream.broker;
 
 import java.util.List;
 import java.util.function.Function;
 
-import com.lz.components.bus.stream.message.BusMessage;
-import com.lz.components.bus.stream.terminal.TerminalConfigurator;
-import com.lz.components.bus.stream.terminal.TerminalNode;
+import xbus.stream.message.BusMessage;
+import xbus.stream.terminal.TerminalConfigurator;
+import xbus.stream.terminal.TerminalNode;
 
 /**
  * 手动消费,由BusManager负责拉取
