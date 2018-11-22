@@ -51,7 +51,7 @@ public class BusConfigurator extends YamlPropertiesFactoryBean implements Enviro
 		for(Object key:properties.keySet()){
 			String propName = key.toString();
 			if (propName.startsWith(xbusPrefix)) {
-				String busName = StringUtils.substringBefore(propName.substring(15), ".");
+				String busName = StringUtils.substringBefore(propName.substring(xbusPrefix.length()+1), ".");
 				String prefixName = xbusPrefix +"."+ busName;
 				BusConfigBean busConfig=new BusConfigBean();
 				busConfig.setAccessInterval(Long.valueOf(Optional.ofNullable(properties.get(prefixName+".accessInterval")).orElse(BusConfigBean.DEFAULT_ACCESS_INTERVAL).toString()));
