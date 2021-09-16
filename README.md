@@ -1,4 +1,4 @@
-# 消息总线 V1.2.0
+# 消息总线 V1.3.0
 基于Spring对异步消息进行抽象，将对生产者/消费者的操作抽象为对终端的操作；相关概念如下：<br/>
 Terminal：某个服务或应用<br/>
 TerminalNode：服务或应用的某个具体节点；一般指当前节点<br/>
@@ -7,11 +7,18 @@ BusMessage：消息；包含消息类型、消息内容类型、endpoint的value
 BusPayload：消息载体<br/>
 
 当前实现的Terminal注册管理：<br/>
-1.ZooKeeper；当某节点永久下线时需要手动删除ZooKeeper中对应的节点信息<br/>
-2.配置文件<br/>
-当前实现的Broker：<br/>
-1.RabbitMQ；当某节点永久下线时需要手动删除RabbitMQ中对应的队列信息<br/>
+1.ZooKeeper；当某节点永久下线时需要手动删除ZooKeeper中对应的节点信息
+
+2.配置文件
+
+当前实现的Broker：
+
+1.RabbitMQ；当某节点永久下线时需要手动删除RabbitMQ中对应的队列信息
+
 2.RocketMQ
+
+3.Kafka
+
 ##### Notice：若消息需要回执而消费端处理消息后未返回回执或返回Null，则消费端会抛出异常；但并不影响系统运行
 
 ###版本变更记录
@@ -58,6 +65,12 @@ BusPayload：消息载体<br/>
 		<td>V1.2.0</td>
 		<td>2018-11-12</td>
 		<td align="left">1.新增总线标准配置<br/>
+		2.支持总线开关</td>
+	</tr>
+	<tr align='center'>
+		<td>V1.3.0</td>
+		<td>2021-x</td>
+		<td align="left">1.支持Kafka<br/>
 		2.支持总线开关</td>
 	</tr>
 </table>

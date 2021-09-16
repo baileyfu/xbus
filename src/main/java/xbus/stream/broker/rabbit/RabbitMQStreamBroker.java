@@ -39,7 +39,7 @@ import xbus.stream.terminal.TerminalNode;
  * @version 1.0
  * @date 2017-10-22 16:56
  */
-public class RabbitMQStreamBroker extends StreamBrokerInitializer implements MessageCoverter{
+public class RabbitMQStreamBroker extends StreamBrokerInitializer {
 	public RabbitMQStreamBroker(BrokerConfigBean brokerConfig,RabbitTemplate rt) {
 		super(brokerConfig,rt);
 	}

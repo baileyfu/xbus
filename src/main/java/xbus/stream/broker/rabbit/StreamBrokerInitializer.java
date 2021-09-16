@@ -1,8 +1,8 @@
 package xbus.stream.broker.rabbit;
 
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.Connection;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -10,16 +10,15 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate.ConfirmCallback;
 import org.springframework.amqp.rabbit.core.RabbitTemplate.ReturnCallback;
 import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.amqp.rabbit.support.PublisherCallbackChannel;
-
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-
-import commons.beanutils.BeanUtils;
 import xbus.stream.broker.BrokerConfigBean;
 import xbus.stream.broker.ManualConsumeStreamBroker;
+import xbus.stream.message.MessageCoverter;
 import xbus.stream.terminal.TerminalNode;
 
-public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker{
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+
+public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker implements MessageCoverter {
 	protected RabbitTemplate rabbitTemplate;
 
 	public StreamBrokerInitializer(BrokerConfigBean brokerConfig,RabbitTemplate rt) {
@@ -72,12 +71,12 @@ public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker{
 			channel = conn.createChannel(true);
 			try {
 				AMQP.Exchange.DeclareOk exchangeDeclareOk = channel.exchangeDeclare(terminalNode.getTerminalName(), "direct", durable, false, false, null);
-				LOGGER.info("The exchange {} has been created successfully ! detail [{}]", terminalNode.getTerminalName(), BeanUtils.dump(exchangeDeclareOk));
+				LOGGER.info("The exchange {} has been created successfully ! detail [{}]", terminalNode.getTerminalName(), ReflectionToStringBuilder.toString(exchangeDeclareOk));
 				try {
 					AMQP.Queue.DeclareOk queueDeclareOk = channel.queueDeclare(terminalNode.getName(), durable, false, false, null);
-					LOGGER.info("The queue {} has been created successfully ! detail [{}]", queueDeclareOk.getQueue(), BeanUtils.dump(queueDeclareOk));
+					LOGGER.info("The queue {} has been created successfully ! detail [{}]", queueDeclareOk.getQueue(), ReflectionToStringBuilder.toString(queueDeclareOk));
 					AMQP.Queue.BindOk bindOk = channel.queueBind(queueDeclareOk.getQueue(), terminalNode.getTerminalName(), terminalNode.getName());
-					LOGGER.info("The binding {} has been done successfully ! detail [{}]", "", BeanUtils.dump(bindOk));
+					LOGGER.info("The binding {} has been done successfully ! detail [{}]", "", ReflectionToStringBuilder.toString(bindOk));
 				} catch (Exception e) {
 					LOGGER.error("channel create queue[" + terminalNode.getName() + "] error!", e);
 				}

@@ -94,20 +94,19 @@ public final class BusManager implements BusLoggerHolder {
 		}
 		return message;
 	}
+
 	/**
 	 * 发送给所有终端的所有节点
-	 * 
-	 * @param path
 	 * @param message
 	 */
 	public void post(BusMessage message) {
 		streamBroker.produce(terminalConfigurator.getCurrentTerminals(), pretreat(message));
 	}
+
 	/**
 	 * 按指定发送模式发送给所有终端
-	 * 
-	 * @param path
 	 * @param message
+	 * @param postMode
 	 */
 	public void post(BusMessage message,PostMode postMode) {
 		Terminal[] currentTerminals = terminalConfigurator.getCurrentTerminals();
