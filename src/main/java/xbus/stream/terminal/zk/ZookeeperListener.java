@@ -56,7 +56,7 @@ public final class ZookeeperListener implements BusLoggerHolder{
 					//终端有多个节点时可能会抛出异常
 					zkClient.createPersistent(currentTerminalPath,currentTerminalPath);
 				}catch(Exception e){
-					e.printStackTrace();
+					LOGGER.error("ZookeeperListener start error !", e);
 				}
 			}
 			if (!zkClient.exists(currentTerminalNodePath)) {

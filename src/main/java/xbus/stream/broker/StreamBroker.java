@@ -2,6 +2,7 @@ package xbus.stream.broker;
 
 import java.util.Set;
 
+import xbus.bean.EndpointBean;
 import xbus.stream.message.BusMessage;
 import xbus.stream.terminal.Terminal;
 import xbus.stream.terminal.TerminalNode;
@@ -20,10 +21,10 @@ public interface StreamBroker {
 	 * MQ实现方式：针对terminalName+endpoint分别建立Topic和Queue，各MQ实现细节不同
 	 * 
 	 * @param currentTerminalNode 当前服务节点
-	 * @param endpointList 当前服务所提供的endpoint
+	 * @param endpoints 当前服务所提供的endpoint
 	 * @throws Exception
 	 */
-	public void initializeChannel(TerminalNode currentTerminalNode,Set<String> endpointList) throws Exception;
+	public void initializeChannel(TerminalNode currentTerminalNode,Set<EndpointBean> endpoints) throws Exception;
 	/**
 	 * 释放通道相关资源
 	 * @throws Exception

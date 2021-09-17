@@ -1,6 +1,7 @@
 package xbus.stream.broker.kafka;
 
 
+import xbus.core.config.BusConfigBean;
 import xbus.stream.broker.BrokerConfigBean;
 import xbus.stream.broker.ConsumeReceipt;
 import xbus.stream.message.BusMessage;
@@ -17,8 +18,13 @@ import java.util.function.Function;
  * @description
  */
 public class KafkaStreamBroker extends StreamBrokerInitializer {
-    public KafkaStreamBroker(BrokerConfigBean brokerConfig) {
-        super(brokerConfig);
+    public KafkaStreamBroker(BusConfigBean busConfig, BrokerConfigBean brokerConfig) {
+        super(busConfig,brokerConfig);
+    }
+
+    @Override
+    public int consume(TerminalNode terminalNode, Function<List<BusMessage>, List<ConsumeReceipt>> consumer) throws RuntimeException {
+        return 0;
     }
 
     @Override
@@ -26,8 +32,4 @@ public class KafkaStreamBroker extends StreamBrokerInitializer {
 //TODO
     }
 
-    @Override
-    public void consume(TerminalNode terminalNode, Function<List<BusMessage>, List<ConsumeReceipt>> consumer) throws RuntimeException {
-//TODO
-    }
 }

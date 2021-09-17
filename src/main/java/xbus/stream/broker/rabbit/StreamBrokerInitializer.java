@@ -1,8 +1,9 @@
 package xbus.stream.broker.rabbit;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+
+import commons.beanutils.BeanUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.Connection;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -10,19 +11,20 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate.ConfirmCallback;
 import org.springframework.amqp.rabbit.core.RabbitTemplate.ReturnCallback;
 import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.amqp.rabbit.support.PublisherCallbackChannel;
+
+import xbus.bean.EndpointBean;
+import xbus.core.config.BusConfigBean;
 import xbus.stream.broker.BrokerConfigBean;
 import xbus.stream.broker.ManualConsumeStreamBroker;
-import xbus.stream.message.MessageCoverter;
 import xbus.stream.terminal.TerminalNode;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
 
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-
-public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker implements MessageCoverter {
+public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker{
 	protected RabbitTemplate rabbitTemplate;
 
-	public StreamBrokerInitializer(BrokerConfigBean brokerConfig,RabbitTemplate rt) {
-		super(brokerConfig);
+	public StreamBrokerInitializer(BusConfigBean busConfig,BrokerConfigBean brokerConfig,RabbitTemplate rt) {
+		super(busConfig,brokerConfig);
 		this.rabbitTemplate = rt;
 		if (!this.rabbitTemplate.isConfirmListener()) {
 			//消息无法发送到Exchange时被触发
@@ -63,7 +65,7 @@ public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker 
 	}
 	
 	@Override
-	public void initializeChannel(TerminalNode terminalNode,Set<String> endpointList) throws Exception {
+	public void initializeChannel(TerminalNode terminalNode,Set<EndpointBean> endpoints) throws Exception {
 		Connection conn = null;
 		Channel channel = null;
 		try {
@@ -71,12 +73,12 @@ public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker 
 			channel = conn.createChannel(true);
 			try {
 				AMQP.Exchange.DeclareOk exchangeDeclareOk = channel.exchangeDeclare(terminalNode.getTerminalName(), "direct", durable, false, false, null);
-				LOGGER.info("The exchange {} has been created successfully ! detail [{}]", terminalNode.getTerminalName(), ReflectionToStringBuilder.toString(exchangeDeclareOk));
+				LOGGER.info("The exchange {} has been created successfully ! detail [{}]", terminalNode.getTerminalName(), BeanUtils.dump(exchangeDeclareOk));
 				try {
 					AMQP.Queue.DeclareOk queueDeclareOk = channel.queueDeclare(terminalNode.getName(), durable, false, false, null);
-					LOGGER.info("The queue {} has been created successfully ! detail [{}]", queueDeclareOk.getQueue(), ReflectionToStringBuilder.toString(queueDeclareOk));
+					LOGGER.info("The queue {} has been created successfully ! detail [{}]", queueDeclareOk.getQueue(), BeanUtils.dump(queueDeclareOk));
 					AMQP.Queue.BindOk bindOk = channel.queueBind(queueDeclareOk.getQueue(), terminalNode.getTerminalName(), terminalNode.getName());
-					LOGGER.info("The binding {} has been done successfully ! detail [{}]", "", ReflectionToStringBuilder.toString(bindOk));
+					LOGGER.info("The binding {} has been done successfully ! detail [{}]", "", BeanUtils.dump(bindOk));
 				} catch (Exception e) {
 					LOGGER.error("channel create queue[" + terminalNode.getName() + "] error!", e);
 				}
@@ -102,5 +104,6 @@ public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker 
 
 	@Override
 	public void destoryChannel() throws Exception {
+//		rabbitTemplate.stop();
 	}
 }

@@ -1,5 +1,6 @@
 package xbus.stream.broker.rabbit;
 
+
 import xbus.stream.broker.BrokerConfigBean;
 
 /**

@@ -1,12 +1,13 @@
 package xbus.annotation;
 
+import xbus.constants.MessageContentType;
+import xbus.core.BusManagerFactory;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import xbus.core.BusManagerFactory;
-import xbus.em.MessageContentType;
 
 /**
  * 总线子路径
@@ -18,15 +19,18 @@ import xbus.em.MessageContentType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface BusEndpoint {
-	public String busName() default BusManagerFactory.DEFAULT_CACHE_MANAGER_NAME;
-
+	public String busName() default BusManagerFactory.DEFAULT_BUS_NAME;
 	/**
 	 * 对应path
 	 * 
 	 * @return
 	 */
 	public String value();
-
+	/**
+	 * 是否开启面向节点
+	 * @return
+	 */
+	public boolean nodeOriented()default false;
 	/**
 	 * 消息类型<br/>
 	 * 默认为JSON

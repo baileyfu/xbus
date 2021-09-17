@@ -10,5 +10,5 @@ import org.slf4j.LoggerFactory;
  * @date 2017-10-30 15:32
  */
 public interface BusLoggerHolder {
-	Logger LOGGER = LoggerFactory.getLogger("xbus.logger");
+    Logger LOGGER= LoggerFactory.getLogger("xbus");
 }

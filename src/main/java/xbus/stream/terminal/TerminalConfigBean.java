@@ -8,10 +8,21 @@ package xbus.stream.terminal;
  * @version 1.0.0
  */
 public class TerminalConfigBean {
+	public static final boolean DEFAULT_ENABLE = Boolean.TRUE;
+	public static final int DEFAULT_PRIORITY = 0;
+	
 	private String serverName;
 	private String ip;
 	private int port;
+	
+	private boolean enable;
+	private int priority;
 
+	public TerminalConfigBean() {
+		enable = DEFAULT_ENABLE;
+		priority = DEFAULT_PRIORITY;
+	}
+	
 	public String getServerName() {
 		return serverName;
 	}
@@ -34,5 +45,21 @@ public class TerminalConfigBean {
 
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	public boolean isEnable() {
+		return enable;
+	}
+
+	public void setEnable(boolean enable) {
+		this.enable = enable;
+	}
+
+	public int getPriority() {
+		return priority;
+	}
+
+	public void setPriority(int priority) {
+		this.priority = priority;
 	}
 }

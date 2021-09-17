@@ -1,5 +1,6 @@
 package xbus.stream.terminal.zk;
 
+import xbus.constants.TerminalTypeEnum;
 import xbus.stream.terminal.TerminalConfigurator;
 
 /**
@@ -36,5 +37,9 @@ public class ZKConfigurator extends TerminalConfigurator{
 			zookeeperListener.stop();
 			zookeeperListener = null;
 		}
+	}
+	@Override
+	protected TerminalTypeEnum getTerminalType() {
+		return TerminalTypeEnum.ZOOKEEPER;
 	}
 }

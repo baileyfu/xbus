@@ -1,6 +1,6 @@
 package xbus.stream.message.payload;
 
-import xbus.em.MessageContentType;
+import xbus.constants.MessageContentType;
 
 /**
  * 暂时保存为String<br/>

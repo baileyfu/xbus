@@ -1,6 +1,6 @@
 package xbus.stream.message;
 
-import xbus.em.MessageType;
+import xbus.constants.MessageType;
 import xbus.stream.message.payload.BusPayload;
 
 /**
@@ -11,12 +11,25 @@ import xbus.stream.message.payload.BusPayload;
  * @date 2017-11-02 11:23
  */
 public class ReceiptBusMessage extends BusMessage {
-	public ReceiptBusMessage() {
+	private String sourcePath;
+
+	public ReceiptBusMessage(String sourcePath) {
 		super();
-		this.messageType=MessageType.RECEIPT;
+		this.sourcePath = sourcePath;
+		this.messageType = MessageType.RECEIPT;
 	}
-	public ReceiptBusMessage(BusPayload busPayload) {
+
+	public ReceiptBusMessage(String sourcePath, BusPayload busPayload) {
 		super(busPayload);
-		this.messageType=MessageType.RECEIPT;
+		this.sourcePath = sourcePath;
+		this.messageType = MessageType.RECEIPT;
+	}
+	public String getSourcePath() {
+		return sourcePath;
+	}
+
+	@Override
+	public String toString() {
+		return "ReceiptBusMessage [sourcePath=" + sourcePath + ", " + super.toString() + "]";
 	}
 }

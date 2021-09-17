@@ -1,5 +1,6 @@
 package xbus.stream.terminal;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -56,6 +57,10 @@ public class Terminal {
 	@Override
 	public int hashCode() {
 		return new StringBuilder("TERMINAL-").append(name).toString().hashCode();
+	}
+	@Override
+	public String toString() {
+		return "Terminal [name=" + name + ", nodes=" + Arrays.toString(nodes) + "]";
 	}
 	
 }

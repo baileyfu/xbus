@@ -3,6 +3,7 @@ package xbus.stream.broker.rabbit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,11 +19,10 @@ import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.amqp.rabbit.support.DefaultMessagePropertiesConverter;
 import org.springframework.amqp.rabbit.support.MessagePropertiesConverter;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.GetResponse;
-
-import xbus.em.HeaderParams;
-import xbus.em.MessageType;
+import com.alibaba.fastjson.JSON;
+import xbus.constants.HeaderParams;
+import xbus.constants.MessageType;
+import xbus.core.config.BusConfigBean;
 import xbus.stream.broker.BrokerConfigBean;
 import xbus.stream.broker.ConsumeReceipt;
 import xbus.stream.message.BusMessage;
@@ -31,6 +31,8 @@ import xbus.stream.message.OriginalBusMessage;
 import xbus.stream.terminal.Terminal;
 import xbus.stream.terminal.TerminalConfigurator;
 import xbus.stream.terminal.TerminalNode;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.GetResponse;
 
 /**
  * Rabbit消息处理器
@@ -39,23 +41,24 @@ import xbus.stream.terminal.TerminalNode;
  * @version 1.0
  * @date 2017-10-22 16:56
  */
-public class RabbitMQStreamBroker extends StreamBrokerInitializer {
-	public RabbitMQStreamBroker(BrokerConfigBean brokerConfig,RabbitTemplate rt) {
-		super(brokerConfig,rt);
+public class RabbitMQStreamBroker extends StreamBrokerInitializer implements MessageCoverter{
+	public RabbitMQStreamBroker(BusConfigBean busConfig,BrokerConfigBean brokerConfig,RabbitTemplate rt) {
+		super(busConfig,brokerConfig,rt);
 	}
 	private MessagePropertiesConverter messagePropertiesConverter = new DefaultMessagePropertiesConverter();
 	@Override
-	public void consume(TerminalNode terminalNode, Function<List<BusMessage>, List<ConsumeReceipt>> consumer) throws RuntimeException {
-		rabbitTemplate.execute(new ChannelCallback<Void>(){
+	public int consume(TerminalNode terminalNode, Function<List<BusMessage>, List<ConsumeReceipt>> consumer) throws RuntimeException {
+		return rabbitTemplate.execute(new ChannelCallback<Integer>(){
 			@Override
-			public Void doInRabbit(Channel channel) throws Exception {
+			public Integer doInRabbit(Channel channel) throws Exception {
+				int msgCount = 0;
 				long t = System.currentTimeMillis();
 				GetResponse response = null;
 				while(response==null){
 					response = channel.basicGet(terminalNode.getName(), false);
 					if (response != null) {
 						long deliveryTag = response.getEnvelope().getDeliveryTag();
-						int msgCount = response.getMessageCount();
+						msgCount = response.getMessageCount();
 						MessageProperties messageProps = messagePropertiesConverter.toMessageProperties(response.getProps(), response.getEnvelope(), "utf-8");
 						if (msgCount >= 0) {
 							messageProps.setMessageCount(msgCount);
@@ -79,7 +82,7 @@ public class RabbitMQStreamBroker extends StreamBrokerInitializer {
 					if (consumerTimeoutMillis > -1 && System.currentTimeMillis() - t >= consumerTimeoutMillis)
 						break;
 				}
-				return null;
+				return msgCount;
 			}
 		});
 	}
@@ -89,10 +92,13 @@ public class RabbitMQStreamBroker extends StreamBrokerInitializer {
 		Map<String,Object> headers=messageProperties.getHeaders();
 		Asserts.check(headers != null && headers.size() > 0, "Received amqpMessage's headers should not be null or empty!");
 		String path = StringUtils.defaultString((String)headers.get(HeaderParams.XBUS_PATH.name()));
+		String sourcePath = StringUtils.defaultString((String)headers.get(HeaderParams.XBUS_SOURCE_PATH.name()));
 		String sourceTerminal = StringUtils.defaultString((String)headers.get(HeaderParams.XBUS_SOURCE_TERMINAL.name()));
 		String messageType = StringUtils.defaultString((String)headers.get(HeaderParams.XBUS_MESSAGE_TYPE.name()));
 		String messageContentType = StringUtils.defaultString((String)headers.get(HeaderParams.XBUS_MESSAGE_CONTENT_TYPE.name()));
-		return coverter(path, sourceTerminal, messageType, messageContentType, amqpMessage.getBody());
+		String originals = StringUtils.defaultString((String)headers.get(HeaderParams.XBUS_ORIGINALS.name()));
+		String requireReceipt=Optional.ofNullable((String)headers.get(HeaderParams.XBUS_REQUIRE_RECEIPT.name())).orElse(Boolean.FALSE.toString());
+		return coverter(path, sourcePath,sourceTerminal, messageType, messageContentType, amqpMessage.getBody(),StringUtils.isBlank(originals)?null:JSON.parseObject(originals),Boolean.valueOf(requireReceipt));
 	}
 	@Override
 	protected void send(Terminal terminal, BusMessage message) {

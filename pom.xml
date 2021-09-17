@@ -1,30 +1,35 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>x</groupId>
-  <artifactId>bus</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <groupId>io.github</groupId>
+  <artifactId>xbus</artifactId>
+  <version>${xbus.version}</version>
   
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
+      <xbus.version>1.3.0</xbus.version>
 
+      <io-github-commons.version>1.0.0</io-github-commons.version>
       <spring.version>4.3.8.RELEASE</spring.version>
-      <commons-lang3.version>3.3</commons-lang3.version>
-      <commons-beanutils.version>1.9.3</commons-beanutils.version>
       <commons-codec.version>1.10</commons-codec.version>
-      <fastjson.version>1.2.78</fastjson.version>
       <xstream.version>1.4.10</xstream.version>
-      <slf4j.version>1.7.12</slf4j.version>
       <yaml.version>1.17</yaml.version>
+      <zkClient.version>0.11</zkClient.version>
       <rocket-client.version>4.3.0</rocket-client.version>
       <amqp-client.version>1.7.11.RELEASE</amqp-client.version>
       <kafka-client.version>2.8.0</kafka-client.version>
   </properties>
   
   <dependencies>
-        <!-- springframework -->
+      <!-- io.github -->
+      <dependency>
+          <groupId>io.github</groupId>
+          <artifactId>commons</artifactId>
+          <version>${io-github-commons.version}</version>
+      </dependency>
+      <!-- springframework -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
@@ -42,37 +47,9 @@
         </dependency>
         <!-- apache commons -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons-lang3.version}</version>
-        </dependency>
-        <dependency>
-		    <groupId>commons-beanutils</groupId>
-		    <artifactId>commons-beanutils</artifactId>
-		    <version>${commons-beanutils.version}</version>
-		</dependency>
-        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>${commons-codec.version}</version>
-        </dependency>
-        <!-- LOG -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.logback-extensions</groupId>
-            <artifactId>logback-ext-spring</artifactId>
-            <version>0.1.1</version>
-            <scope>provided</scope>
         </dependency>
 		<!-- yaml -->
 		<dependency>
@@ -80,12 +57,6 @@
 		   <artifactId>snakeyaml</artifactId>
 		   <version>${yaml.version}</version>
 		</dependency>
-	    <!-- Fastjson -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>${fastjson.version}</version>
-        </dependency>
         <!-- XML -->
         <dependency>
 		    <groupId>com.thoughtworks.xstream</groupId>
@@ -96,7 +67,7 @@
 		<dependency>
 		    <groupId>com.101tec</groupId>
 		    <artifactId>zkclient</artifactId>
-		    <version>0.10</version>
+		    <version>${zkClient.version}</version>
 		</dependency>
       <!-- amqp-client -->
       <dependency>
@@ -116,23 +87,50 @@
           <artifactId>kafka-clients</artifactId>
           <version>${kafka-client.version}</version>
       </dependency>
-	    
-	    <dependency>
-		    <groupId>junit</groupId>
-		    <artifactId>junit</artifactId>
-		    <version>4.12</version>
-		    <scope>test</scope>
-		</dependency>
-		<dependency>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-test</artifactId>
-		    <version>${spring.version}</version>
-		    <scope>test</scope>
-		</dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+      <!-- LOG -->
+      <dependency>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+          <version>1.1.3</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.logback-extensions</groupId>
+          <artifactId>logback-ext-spring</artifactId>
+          <version>0.1.1</version>
+          <scope>provided</scope>
+      </dependency>
+
     </dependencies>
   
   <build>
     <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>attach-sources</id>
+                    <goals>
+                        <goal>jar</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
@@ -142,4 +140,12 @@
         </plugin>
     </plugins>
   </build>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/baileyfu/mvn-repo</url>
+        </repository>
+    </distributionManagement>
 </project>

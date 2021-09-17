@@ -1,5 +1,7 @@
 package xbus.stream.broker.kafka;
 
+import xbus.bean.EndpointBean;
+import xbus.core.config.BusConfigBean;
 import xbus.stream.broker.BrokerConfigBean;
 import xbus.stream.broker.ManualConsumeStreamBroker;
 import xbus.stream.message.MessageCoverter;
@@ -15,12 +17,12 @@ import java.util.Set;
  */
 public abstract class StreamBrokerInitializer extends ManualConsumeStreamBroker implements MessageCoverter {
 
-    public StreamBrokerInitializer(BrokerConfigBean brokerConfig) {
-        super(brokerConfig);
+    public StreamBrokerInitializer(BusConfigBean busConfig,BrokerConfigBean brokerConfig) {
+        super(busConfig,brokerConfig);
     }
 
     @Override
-    public void initializeChannel(TerminalNode currentTerminalNode, Set<String> endpointList) throws Exception {
+    public void initializeChannel(TerminalNode currentTerminalNode, Set<EndpointBean> endpointList) throws Exception {
 //TODO
     }
 

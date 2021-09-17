@@ -3,6 +3,7 @@ package xbus.stream.broker;
 import java.util.List;
 import java.util.function.Function;
 
+import xbus.core.config.BusConfigBean;
 import xbus.stream.message.BusMessage;
 
 /**
@@ -13,14 +14,14 @@ import xbus.stream.message.BusMessage;
  * @version 1.0.0
  */
 public abstract class AutoConsumeStreamBroker extends AbstractStreamBroker {
-	public AutoConsumeStreamBroker(BrokerConfigBean brokerConfig) {
-		super(brokerConfig);
+	public AutoConsumeStreamBroker(BusConfigBean busConfig, xbus.stream.broker.BrokerConfigBean brokerConfig) {
+		super(busConfig,brokerConfig);
 	}
 
 	/**
 	 * 开始接收消息
 	 */
-	public abstract void startReceive(long consumeIntervalMills,Function<List<BusMessage>,List<ConsumeReceipt>> consumer)throws Exception;
+	public abstract void startReceive(long consumeIntervalMills,Function<List<BusMessage>,List<xbus.stream.broker.ConsumeReceipt>> consumer)throws Exception;
 
 	/**
 	 * 停止接收消息

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import xbus.constants.TerminalTypeEnum;
 import xbus.stream.terminal.Terminal;
 import xbus.stream.terminal.TerminalConfigurator;
 import xbus.stream.terminal.TerminalNode;
@@ -29,7 +30,7 @@ public class FileConfigurator extends TerminalConfigurator{
 		specifiedByfile = new HashSet<>();
 		for (ServerInfo serverInfo : fileConfig.getServers()) {
 			Terminal terminal = new Terminal();
-			terminal.setName(fileConfig.getServerName());
+			terminal.setName(serverInfo.getServerName());
 			Set<TerminalNode> nodes = new HashSet<>();
 			List<NodeAddress> nodeInfo = serverInfo.getNodeInfo();
 			//配置了子节点信息
@@ -53,5 +54,10 @@ public class FileConfigurator extends TerminalConfigurator{
 
 	@Override
 	protected void release() throws Exception {
+	}
+
+	@Override
+	protected TerminalTypeEnum getTerminalType() {
+		return TerminalTypeEnum.FILE;
 	}
 }

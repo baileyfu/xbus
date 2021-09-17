@@ -1,5 +1,7 @@
 package xbus.core.config;
 
+import java.util.Map;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -11,18 +13,17 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.stereotype.Component;
 
-import xbus.AsyncBusTemplate;
-import xbus.BusTemplate;
+import xbus.core.DefaultAsyncBusTemplate;
+import xbus.core.DefaultBusTemplate;
 import xbus.stream.broker.BrokerConfigBean;
 import xbus.stream.broker.rabbit.RabbitConfigBean;
 import xbus.stream.broker.rabbit.RabbitMQStreamBroker;
+import xbus.stream.broker.rocket.DefaultRocketStreamBroker;
+import xbus.stream.broker.rocket.MultiendRocketStreamBroker;
 import xbus.stream.broker.rocket.RocketConfigBean;
-import xbus.stream.broker.rocket.RocketMQStreamBroker;
+import xbus.stream.terminal.MiscTerminalConfigurator;
 import xbus.stream.terminal.TerminalConfigBean;
-import xbus.stream.terminal.file.FileConfigBean;
-import xbus.stream.terminal.file.FileConfigurator;
-import xbus.stream.terminal.zk.ZKConfigBean;
-import xbus.stream.terminal.zk.ZKConfigurator;
+import xbus.stream.terminal.VoidTerminalConfigurator;
 /**
  * 
  * @author fuli
@@ -31,6 +32,8 @@ import xbus.stream.terminal.zk.ZKConfigurator;
  */
 @Component
 public class BusTemplateRegister extends BusConfigurator implements BeanDefinitionRegistryPostProcessor{
+	public static final String DEFAULT_BUS_NAME = "busTemplate";
+	public static final String BUS_NAME_SUFFIX = "BusTemplate";
 	private BeanDefinitionRegistry registry;
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
@@ -38,20 +41,27 @@ public class BusTemplateRegister extends BusConfigurator implements BeanDefiniti
 	}
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		for (String busName : busConfigs.keySet()) {
+			BusConfigBean busConfig=busConfigs.get(busName);
 			//broker
 			String brokerBeanName = busName + "StreamBroker";
 			RootBeanDefinition streamBroker = new RootBeanDefinition();
 			BrokerConfigBean brokerConfig = brokerConfigs.get(busName);
 			if (brokerConfig instanceof RocketConfigBean) {
-				streamBroker.setBeanClass(RocketMQStreamBroker.class);
+				streamBroker.setBeanClass(DefaultRocketStreamBroker.class);
+				// 启用Rocket多端总线
+				if (((RocketConfigBean) brokerConfig).isMultiend()) {
+					streamBroker.setBeanClass(MultiendRocketStreamBroker.class);
+				}
 				ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-				constructorArgumentValues.addIndexedArgumentValue(0, brokerConfig);
+				constructorArgumentValues.addIndexedArgumentValue(0, busConfig);
+				constructorArgumentValues.addIndexedArgumentValue(1, brokerConfig);
 				streamBroker.setConstructorArgumentValues(constructorArgumentValues);
 			} else if (brokerConfig instanceof RabbitConfigBean) {
 				streamBroker.setBeanClass(RabbitMQStreamBroker.class);
 				ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-				constructorArgumentValues.addIndexedArgumentValue(0, brokerConfig);
-				constructorArgumentValues.addIndexedArgumentValue(1, new RuntimeBeanReference(((RabbitConfigBean)brokerConfig).getRabbitTemplateName()));
+				constructorArgumentValues.addIndexedArgumentValue(0, busConfig);
+				constructorArgumentValues.addIndexedArgumentValue(1, brokerConfig);
+				constructorArgumentValues.addIndexedArgumentValue(2, new RuntimeBeanReference(((RabbitConfigBean)brokerConfig).getRabbitTemplateName()));
 				streamBroker.setConstructorArgumentValues(constructorArgumentValues);
 			} else {
 				throw new IllegalStateException("no streamBroker found!");
@@ -61,32 +71,51 @@ public class BusTemplateRegister extends BusConfigurator implements BeanDefiniti
 			//terminal
 			String terminalConfiguratorBeanName=busName + "TerminalConfigurator";
 			RootBeanDefinition terminalConfigurator = new RootBeanDefinition();
-			TerminalConfigBean terminalConfig=terminalConfigs.get(busName);
-			if(terminalConfig instanceof ZKConfigBean){
-				terminalConfigurator.setBeanClass(ZKConfigurator.class);
+//			TerminalConfigBean terminalConfig=terminalConfigs.get(busName);
+//			if(terminalConfig instanceof ZKConfigBean){
+//				terminalConfigurator.setBeanClass(ZKConfigurator.class);
+//				ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+//				constructorArgumentValues.addIndexedArgumentValue(0, terminalConfig);
+//				terminalConfigurator.setConstructorArgumentValues(constructorArgumentValues);
+//			}else if(terminalConfig instanceof FileConfigBean){
+//				terminalConfigurator.setBeanClass(FileConfigurator.class);
+//				ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+//				constructorArgumentValues.addIndexedArgumentValue(0, terminalConfig);
+//				terminalConfigurator.setConstructorArgumentValues(constructorArgumentValues);
+//			}else if(terminalConfig instanceof EKConfigBean) {
+//				terminalConfigurator.setBeanClass(EurekaConfigurator.class);
+//				ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+//				constructorArgumentValues.addIndexedArgumentValue(0, terminalConfig);
+//				terminalConfigurator.setConstructorArgumentValues(constructorArgumentValues);
+//			}else{
+//				throw new IllegalStateException("no terminalConfigurator found!");
+//			}
+			Map<String, TerminalConfigBean> terminalConfigMap = terminalConfigs.get(busName);
+			if(terminalConfigMap == null || terminalConfigMap.size() == 0) {
+				if (busConfig.isPostUndefined()) {
+					terminalConfigurator.setBeanClass(VoidTerminalConfigurator.class);
+				} else {
+					throw new IllegalStateException("no terminalConfigurator found!");
+				}
+			}else {
+				terminalConfigurator.setBeanClass(MiscTerminalConfigurator.class);
 				ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-				constructorArgumentValues.addIndexedArgumentValue(0, terminalConfig);
+				constructorArgumentValues.addIndexedArgumentValue(0, terminalConfigMap);
 				terminalConfigurator.setConstructorArgumentValues(constructorArgumentValues);
-			}else if(terminalConfig instanceof FileConfigBean){
-				terminalConfigurator.setBeanClass(FileConfigurator.class);
-				ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-				constructorArgumentValues.addIndexedArgumentValue(0, terminalConfig);
-				terminalConfigurator.setConstructorArgumentValues(constructorArgumentValues);
-			}else{
-				throw new IllegalStateException("no terminalConfigurator found!");
 			}
 			terminalConfigurator.setScope(BeanDefinition.SCOPE_SINGLETON);
 			registry.registerBeanDefinition(terminalConfiguratorBeanName, terminalConfigurator);
 			//busTemplate
-			BusConfigBean busConfig=busConfigs.get(busName);
-			BeanDefinitionBuilder busTemplateBuilder = BeanDefinitionBuilder.genericBeanDefinition(busConfig.isAsyncAble()?AsyncBusTemplate.class:BusTemplate.class);
+			BeanDefinitionBuilder busTemplateBuilder = BeanDefinitionBuilder.genericBeanDefinition(busConfig.isAsyncAble()?DefaultAsyncBusTemplate.class:DefaultBusTemplate.class);
 			busTemplateBuilder.addConstructorArgValue(busName);
 			busTemplateBuilder.addConstructorArgReference(brokerBeanName);
 			busTemplateBuilder.addConstructorArgReference(terminalConfiguratorBeanName);
 			busTemplateBuilder.addConstructorArgValue(busConfig);
+//			busTemplateBuilder.setInitMethodName("initialize");
+			busTemplateBuilder.setDestroyMethodName("destroy");
 			BeanDefinition busTemplateDefinition = busTemplateBuilder.getBeanDefinition();
 			busTemplateDefinition.setScope(BeanDefinition.SCOPE_SINGLETON);
-	        registry.registerBeanDefinition(busName+"BusTemplate",busTemplateDefinition);
+	        registry.registerBeanDefinition(busName+BUS_NAME_SUFFIX,busTemplateDefinition);
 		}
 	}
 }

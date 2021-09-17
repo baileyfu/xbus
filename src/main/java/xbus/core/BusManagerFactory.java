@@ -3,8 +3,8 @@ package xbus.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import xbus.stream.broker.StreamBroker;
 import xbus.stream.terminal.TerminalConfigurator;
+import xbus.stream.broker.StreamBroker;
 
 /**
  * 总线管理器创建工厂
@@ -14,12 +14,12 @@ import xbus.stream.terminal.TerminalConfigurator;
  * @version 1.0.0
  */
 public class BusManagerFactory {
-	public static final String DEFAULT_CACHE_MANAGER_NAME = "DEFAULT_BUS_MANAGER";
+	public static final String DEFAULT_BUS_NAME = "DEFAULT_BUS";
 	private static BusManagerFactory instance = new BusManagerFactory();
 	private static Map<String, BusManager> MANAGER_HOLDER = new HashMap<>();
 
 	public BusManager create(StreamBroker streamBroker, TerminalConfigurator terminalConfigurator) {
-		return create(DEFAULT_CACHE_MANAGER_NAME, streamBroker, terminalConfigurator);
+		return create(DEFAULT_BUS_NAME, streamBroker, terminalConfigurator);
 	}
 
 	public synchronized BusManager create(String busName, StreamBroker streamBroker, TerminalConfigurator terminalConfigurator) {
@@ -31,7 +31,7 @@ public class BusManagerFactory {
 	}
 
 	public static BusManager get() {
-		return MANAGER_HOLDER.get(DEFAULT_CACHE_MANAGER_NAME);
+		return MANAGER_HOLDER.get(DEFAULT_BUS_NAME);
 	}
 
 	public static BusManager get(String busName) {

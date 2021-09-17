@@ -4,8 +4,7 @@ import org.apache.http.util.Asserts;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-
-import xbus.em.MessageContentType;
+import xbus.constants.MessageContentType;
 
 /**
  * 基于fastjson的实现
@@ -52,5 +51,10 @@ public class JSONBusPayload extends BusPayload {
 	@Override
 	public byte[] toBytes() {
 		return value == null ? null : value.toJSONString().getBytes();
+	}
+
+	@Override
+	public String toString() {
+		return "JSONBusPayload [value=" + value + "]";
 	}
 }

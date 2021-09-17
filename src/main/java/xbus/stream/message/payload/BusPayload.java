@@ -1,6 +1,7 @@
 package xbus.stream.message.payload;
 
-import xbus.em.MessageContentType;
+
+import xbus.constants.MessageContentType;
 
 /**
  * 消息负载

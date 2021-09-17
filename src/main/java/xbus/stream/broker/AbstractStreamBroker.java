@@ -6,17 +6,19 @@ import java.util.function.Predicate;
 import org.apache.http.util.Asserts;
 
 import xbus.BusLoggerHolder;
+import xbus.core.config.BusConfigBean;
 import xbus.stream.message.BusMessage;
 import xbus.stream.terminal.Terminal;
 
 /**
+ * 抽象总线代理器
  * 
  * @author bailey
  * @version 1.0
  * @date 2017-10-20 17:26
  */
-public abstract class AbstractStreamBroker implements BusLoggerHolder, StreamBroker {
-	protected static final String NAME_PREFIX="BUS_";
+public abstract class AbstractStreamBroker implements BusLoggerHolder, xbus.stream.broker.StreamBroker {
+	protected BusConfigBean busConfig;
 	//consumer
 	protected boolean consumeRetryAble;
 	protected int consumeRetryCount;
@@ -54,7 +56,8 @@ public abstract class AbstractStreamBroker implements BusLoggerHolder, StreamBro
 		return retryAble;
 	};
 	
-	public AbstractStreamBroker(BrokerConfigBean brokerConfig) {
+	public AbstractStreamBroker(BusConfigBean busConfig, xbus.stream.broker.BrokerConfigBean brokerConfig) {
+		this.busConfig = busConfig;
 		consumeRetryAble = brokerConfig.isConsumeRetryAble();
 		consumeRetryCount = brokerConfig.getConsumeRetryCount();
 		consumerTimeoutMillis = brokerConfig.getConsumerTimeoutMillis();
@@ -86,16 +89,21 @@ public abstract class AbstractStreamBroker implements BusLoggerHolder, StreamBro
 		return produceRetryAble;
 	}
 
-	protected String legalizeName(String source, String... suffixes) {
-		StringBuilder temp = new StringBuilder(NAME_PREFIX);
-		temp.append(source.replaceAll("\\/","-").replaceAll("\\\\","-").replaceAll("\\.", "-").replaceAll("\\:", "-"));
+	static protected String legalizeTopicName(String source, String... suffixes) {
+		String result;
+		StringBuilder temp = new StringBuilder(xbus.stream.broker.BrokerConst.NAME_PREFIX);
+		temp.append(source);
 		if (suffixes.length > 0) {
+			temp.append(xbus.stream.broker.BrokerConst.SIGN_UNDERLINE);
 			for (String suffix : suffixes) {
-				temp.append(suffix);
+				temp.append(suffix).append(xbus.stream.broker.BrokerConst.SIGN_UNDERLINE);
 			}
-			return temp.substring(0, temp.length() - 1);
+			result = temp.substring(0, temp.length() - 1);
+		} else {
+			result = temp.toString();
 		}
-		return temp.toString();
+		//去除'/'和'\','.'和':'转换为'-'
+		return result.replaceAll("\\/","").replaceAll("\\\\","").replaceAll("\\.", "-").replaceAll("\\:", "-");
 	}
 	protected abstract void send(Terminal terminal, BusMessage message) throws RuntimeException;
 }

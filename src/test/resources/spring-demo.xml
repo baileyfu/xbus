@@ -10,11 +10,11 @@
 	</bean>
 	<context:property-placeholder properties-ref="xbusProperties"/>
 	
-	<bean id="ymlConfig" class="com.lz.components.bus.core.BusConfigurator">
+	<bean id="ymlConfig" class="xbus.core.config.BusConfigurator">
 		<property name="properties" ref="xbusProperties"/>
 	</bean>
 	
-	<bean id="rocketConfig" class="com.lz.components.bus.stream.broker.rocket.RocketConfigBean">
+	<bean id="rocketConfig" class="xbus.stream.broker.rocket.RocketConfigBean">
 		<property name="consumeRetryAble" value="true"/>
 		<property name="consumeRetryCount" value="16"/>
 		<property name="consumerTimeoutMillis" value="900000"/><!-- 15m -->
@@ -26,18 +26,18 @@
         <property name="topicQueueNums" value="4"/>
     </bean>
     <!-- 
-	<bean id="streamBroker" class="com.lz.components.bus.stream.broker.rocket.RocketMQStreamBroker">
+	<bean id="streamBroker" class="com.lz.components.xbus.stream.broker.rocket.RocketMQStreamBroker">
 		<constructor-arg ref="rocketConfig"/>
 	</bean>
-	<bean id="terminalConfigurator" class="com.lz.components.bus.stream.terminal.file.FileConfigurator">
+	<bean id="terminalConfigurator" class="com.lz.components.xbus.stream.terminal.file.FileConfigurator">
 		<constructor-arg index="0" value="appName"/>
 	</bean>
 	
-	<bean id="busTemplate" class="com.lz.components.bus.BusTemplate" init-method="init">
+	<bean id="busTemplate" class="com.lz.components.xbus.BusTemplate" init-method="init">
 		<constructor-arg index="0" ref="busName"/>
 		<constructor-arg index="1" ref="streamBroker"/>
 		<constructor-arg index="2" ref="terminalConfigurator"/>
 		<property name="accessInterval" value="100"/>
 	</bean>
-	<bean class="com.lz.components.bus.core.BusBeanPostProcessor"/> -->
+	<bean class="com.lz.components.xbus.core.BusBeanPostProcessor"/> -->
 </beans>

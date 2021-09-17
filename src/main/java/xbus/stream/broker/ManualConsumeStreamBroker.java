@@ -3,6 +3,7 @@ package xbus.stream.broker;
 import java.util.List;
 import java.util.function.Function;
 
+import xbus.core.config.BusConfigBean;
 import xbus.stream.message.BusMessage;
 import xbus.stream.terminal.TerminalConfigurator;
 import xbus.stream.terminal.TerminalNode;
@@ -15,8 +16,8 @@ import xbus.stream.terminal.TerminalNode;
  * @version 1.0.0
  */
 public abstract class ManualConsumeStreamBroker extends AbstractStreamBroker {
-	public ManualConsumeStreamBroker(BrokerConfigBean brokerConfig) {
-		super(brokerConfig);
+	public ManualConsumeStreamBroker(BusConfigBean busConfig,BrokerConfigBean brokerConfig) {
+		super(busConfig,brokerConfig);
 	}
 	/**
 	 * 消费当前节点的消息
@@ -24,12 +25,12 @@ public abstract class ManualConsumeStreamBroker extends AbstractStreamBroker {
 	 * @param consumer
 	 * @throws RuntimeException
 	 */
-	public void consume(Function<List<BusMessage>, List<ConsumeReceipt>> consumer) throws RuntimeException {
-		consume(TerminalConfigurator.getCurrentTerminalNode(), consumer);
+	public int consume(Function<List<BusMessage>, List<ConsumeReceipt>> consumer) throws RuntimeException {
+		return consume(TerminalConfigurator.getCurrentTerminalNode(), consumer);
 	}
 	/**
 	 * 消费指定节点的消息
 	 * @param terminalNode
 	 */
-	public abstract void consume(TerminalNode terminalNode, Function<List<BusMessage>, List<ConsumeReceipt>> consumer) throws RuntimeException;
+	public abstract int consume(TerminalNode terminalNode, Function<List<BusMessage>, List<ConsumeReceipt>> consumer) throws RuntimeException;
 }

@@ -1,6 +1,6 @@
 package xbus.stream.message.payload;
 
-import xbus.em.MessageContentType;
+import xbus.constants.MessageContentType;
 
 /**
  * 需要制定序列化方法;暂不实现

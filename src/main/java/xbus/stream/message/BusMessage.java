@@ -1,7 +1,8 @@
 package xbus.stream.message;
 
-import xbus.em.MessageContentType;
-import xbus.em.MessageType;
+import com.alibaba.fastjson.JSONObject;
+import xbus.constants.MessageContentType;
+import xbus.constants.MessageType;
 import xbus.stream.message.payload.BusPayload;
 
 /**
@@ -22,6 +23,8 @@ public abstract class BusMessage {
 	private BusPayload busPayload;
 	/** 消息ID */
 	private String messageId;
+	/** 附加内容,供各实现分别处理 */
+	private JSONObject originals;
 
 	public BusMessage() {
 		this.transactional = false;
@@ -61,8 +64,9 @@ public abstract class BusMessage {
 		return busPayload == null ? null : busPayload.getContentType();
 	}
 	
-	public BusPayload getPayLoad(){
-		return busPayload;
+	@SuppressWarnings("unchecked")
+	public <T extends BusPayload>T getPayLoad(){
+		return (T)busPayload;
 	}
 
 	public void setPayLoad(BusPayload busPayload) {
@@ -78,10 +82,16 @@ public abstract class BusMessage {
 	public void setMessageId(String messageId) {
 		this.messageId = messageId;
 	}
+	public JSONObject getOriginals() {
+		return originals;
+	}
+	public void setOriginals(JSONObject originals) {
+		this.originals = originals;
+	}
 	@Override
 	public String toString() {
 		return "BusMessage [transactional=" + transactional + ", messageType=" + messageType + ", path=" + path
 				+ ", sourceTerminal=" + sourceTerminal + ", busPayload=" + busPayload + ", messageId=" + messageId
-				+ "]";
+				+ ", originals=" + originals + "]";
 	}
 }

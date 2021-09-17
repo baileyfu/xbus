@@ -11,9 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 import xbus.AsyncBusTemplate;
 import xbus.annotation.BusEndpoint;
 import xbus.annotation.BusRoot;
+import xbus.constants.MessageContentType;
+import xbus.constants.PostMode;
 import xbus.core.config.BusConfigurator;
-import xbus.em.MessageContentType;
-import xbus.em.PostMode;
 import xbus.stream.message.OriginalBusMessage;
 import xbus.stream.message.payload.JSONBusPayload;
 

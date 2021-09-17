@@ -2,7 +2,7 @@ package xbus.stream.message;
 
 import java.util.function.Consumer;
 
-import xbus.em.MessageType;
+import xbus.constants.MessageType;
 import xbus.stream.message.payload.BusPayload;
 
 /**
@@ -24,7 +24,7 @@ public class OriginalBusMessage extends BusMessage {
 	/**
 	 * 回执消息处理器
 	 */
-	private Consumer<BusPayload> receiptConsumer;
+	private Consumer<? extends BusPayload> receiptConsumer;
 	public OriginalBusMessage() {
 		super();
 		init();
@@ -52,10 +52,15 @@ public class OriginalBusMessage extends BusMessage {
 	public void setRequireReceipt(boolean requireReceipt) {
 		this.requireReceipt = requireReceipt;
 	}
-	public Consumer<BusPayload> getReceiptConsumer() {
+	public Consumer<? extends BusPayload> getReceiptConsumer() {
 		return receiptConsumer;
 	}
-	public void setReceiptConsumer(Consumer<BusPayload> receiptConsumer) {
+	public void setReceiptConsumer(Consumer<? extends BusPayload> receiptConsumer) {
 		this.receiptConsumer = receiptConsumer;
+	}
+	@Override
+	public String toString() {
+		return "OriginalBusMessage [useCurrentNode=" + useCurrentNode + ", requireReceipt=" + requireReceipt
+				+ ", receiptConsumer=" + receiptConsumer + ", " + super.toString() + "]";
 	}
 }
